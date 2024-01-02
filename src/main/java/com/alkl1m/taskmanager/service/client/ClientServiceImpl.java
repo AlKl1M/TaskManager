@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.service.user;
+package com.alkl1m.taskmanager.service.client;
 
 import com.alkl1m.taskmanager.dto.ProjectDto;
 import com.alkl1m.taskmanager.entity.Project;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class ClientServiceImpl implements ClientService{
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
 
