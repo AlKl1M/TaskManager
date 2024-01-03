@@ -17,6 +17,7 @@ import {NzButtonModule} from "ng-zorro-antd/button";
 import {NzInputModule} from "ng-zorro-antd/input";
 import { LoginComponent } from './auth-components/login/login.component';
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
+import {NzLayoutModule} from "ng-zorro-antd/layout";
 
 registerLocaleData(en);
 
@@ -37,7 +38,8 @@ registerLocaleData(en);
     ReactiveFormsModule,
     NzButtonModule,
     NzInputModule,
-    NzCheckboxModule
+    NzCheckboxModule,
+    NzLayoutModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: en_US }
