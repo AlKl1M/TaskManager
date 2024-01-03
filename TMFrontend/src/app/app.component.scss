@@ -1,0 +1,53 @@
+$primary-color: #7f71ef;
+$secondary-color: #7b6ded;
+$White: #ffffff;
+$white-one: #fcfcfc;
+
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 57px;
+  background-color: $primary-color;
+  height: auto;
+
+  a.active {
+    background-color: $secondary-color;
+  }
+}
+
+a {
+  font-weight: 300;
+  font-size: 15px;
+  border-radius: 0px;
+  color: $White;
+}
+
+a.ant-btn {
+  &:hover {
+    color: $White;
+    background-color: $secondary-color;
+  }
+}
+
+img {
+  width: 180px;
+}
+
+.img_profile {
+  width: 25px;
+}
+
+.active-button {
+  border-radius: 0px !important;
+  padding: 2px 5px !important;
+  background: $secondary-color;
+}
+
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $primary-color;
+  padding: 0px;
+}
