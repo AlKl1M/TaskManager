@@ -1,6 +1,5 @@
 <nz-layout>
-  <div *ngIf="!isAdminLoggedIn && !isClientLoggedIn">
-    <nz-header class="main-header" nz-row nzType="flex" style="background-color: #7f71ef;">
+    <nz-header class="main-header" *ngIf="!isAdminLoggedIn && !isClientLoggedIn" nz-row nzType="flex" style="background-color: #7f71ef;">
       <div>
         <a style="color: white; margin-left:50px; font-size: 18px; font-weight: bolder;"
            routerLink="/login">Task Manager</a>
@@ -10,7 +9,33 @@
         <a nz-button nzType="link" routerLink="/login" routerLinkActive="active">Login</a>
       </div>
     </nz-header>
-  </div>
-  <router-outlet></router-outlet>
 
+    <nz-header *ngIf="isClientLoggedIn" class="main-header" nz-row nzType="flex" style="background-color: #7f71ef;">
+        <div>
+            <a style="color: white; margin-left:50px; font-size: 18px; font-weight: bolder;"
+               routerLink="/">Task Manager</a>
+        </div>
+        <div class="nav-links">
+            <a nz-button nzType="link" routerLink="/login" routerLinkActive="active" (click)="logout()">Logout</a>
+        </div>
+    </nz-header>
+    <nz-layout>
+        <nz-sider *ngIf="isClientLoggedIn" nzWidth="200px" nzTheme="light" >
+            <ul nz-menu nzMode="inline" class="sider-menu">
+                <li nz-submenu nzOpen nzTitle="Workflow">
+                    <ul>
+                      <li nz-menu-item nzSelected>
+                        <a style="color: black" routerLink="/client/projects">Projects</a>
+                      </li>
+                    </ul>
+                </li>
+            </ul>
+        </nz-sider>
+        <nz-layout class="inner-layout">
+            <nz-breadcrumb *ngIf="isClientLoggedIn">
+                <nz-breadcrumb-item>Task Manager</nz-breadcrumb-item>
+            </nz-breadcrumb>
+            <nz-content><router-outlet></router-outlet></nz-content>
+        </nz-layout>
+    </nz-layout>
 </nz-layout>
