@@ -7,4 +7,5 @@ import java.util.List;
 public interface ClientService {
     List<ProjectDto> getAllProjects();
     List<ProjectDto> getProjectsByName(String name);
+    List<ProjectDto> getProjectsByUserEmail(String email);
 }
