@@ -1,5 +1,7 @@
 package com.alkl1m.taskmanager.entity;
 
+import com.alkl1m.taskmanager.dto.ProjectDto;
+import com.alkl1m.taskmanager.dto.TaskDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -32,4 +34,16 @@ public class Task {
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JsonIgnore
     private User user;
+
+    public TaskDto getTaskDto() {
+        TaskDto taskDto = new TaskDto();
+        taskDto.setId(id);
+        taskDto.setName(name);
+        taskDto.setDescription(description);
+        taskDto.setCreationDate(creationDate);
+        taskDto.setCompletionDate(completionDate);
+        taskDto.setStatus(status);
+        return taskDto;
+    }
 }
+
