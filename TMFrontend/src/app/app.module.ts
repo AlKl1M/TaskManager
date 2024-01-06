@@ -18,6 +18,8 @@ import {NzInputModule} from "ng-zorro-antd/input";
 import { LoginComponent } from './auth-components/login/login.component';
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {NzLayoutModule} from "ng-zorro-antd/layout";
+import {NzMenuModule} from "ng-zorro-antd/menu";
+import {NzBreadCrumbModule} from "ng-zorro-antd/breadcrumb";
 
 registerLocaleData(en);
 
@@ -27,20 +29,22 @@ registerLocaleData(en);
     SignupComponent,
     LoginComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    NzSpinModule,
-    NzFormModule,
-    ReactiveFormsModule,
-    NzButtonModule,
-    NzInputModule,
-    NzCheckboxModule,
-    NzLayoutModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        NzSpinModule,
+        NzFormModule,
+        ReactiveFormsModule,
+        NzButtonModule,
+        NzInputModule,
+        NzCheckboxModule,
+        NzLayoutModule,
+        NzMenuModule,
+        NzBreadCrumbModule
+    ],
   providers: [
     { provide: NZ_I18N, useValue: en_US }
   ],
