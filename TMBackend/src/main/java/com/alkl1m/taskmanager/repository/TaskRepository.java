@@ -6,9 +6,10 @@ import com.alkl1m.taskmanager.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProjectId(Long projectId);
-
     List<Task> findByProjectIdAndUser(Long projectId, User user);
+    Optional<Task> findByUserEmailAndId(String email, Long taskId);
 }

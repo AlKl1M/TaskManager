@@ -14,4 +14,7 @@ public interface ClientService {
     ProjectDto postProject(ProjectDto projectDto, String email);
     void deleteProject(Long projectId, String email);
     ProjectDto updateProject(Long projectId, ProjectDto projectDto, String email);
+    TaskDto postTask(TaskDto taskDto, String email, Long projectId);
+    void deleteTask(Long taskId, String email);
+    TaskDto updateTask(Long taskId, TaskDto taskDto, String email);
 }

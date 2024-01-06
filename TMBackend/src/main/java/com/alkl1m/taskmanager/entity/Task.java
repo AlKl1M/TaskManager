@@ -1,6 +1,5 @@
 package com.alkl1m.taskmanager.entity;
 
-import com.alkl1m.taskmanager.dto.ProjectDto;
 import com.alkl1m.taskmanager.dto.TaskDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

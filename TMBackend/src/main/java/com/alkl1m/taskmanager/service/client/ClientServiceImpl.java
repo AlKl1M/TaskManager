@@ -36,20 +36,18 @@ public class ClientServiceImpl implements ClientService{
     public List<ProjectDto> getProjectsByUserEmail(String email) {
         User user = userRepository.findByEmail(email);
         List<Project> projects = projectRepository.findByUser(user);
-        List<ProjectDto> projectDtos = projects.stream()
+        return projects.stream()
                 .map(Project::getProjectDto)
                 .collect(Collectors.toList());
-        return projectDtos;
     }
 
     @Override
     public List<TaskDto> getTasksByProjectId(Long projectId, String email) {
         User user = userRepository.findByEmail(email);
         List<Task> tasks = taskRepository.findByProjectIdAndUser(projectId, user);
-        List<TaskDto> tasksDto = tasks.stream()
+        return tasks.stream()
                 .map(Task::getTaskDto)
                 .collect(Collectors.toList());
-        return tasksDto;
     }
 
     @Override
@@ -92,5 +90,53 @@ public class ClientServiceImpl implements ClientService{
             return updatedProject.getProjectDto();
         }
         return null;
+    }
+
+    @Override
+    public TaskDto postTask(TaskDto taskDto, String email, Long projectId) {
+        User user = userRepository.findByEmail(email);
+        Task task = new Task();
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            task.setName(taskDto.getName());
+            task.setDescription(taskDto.getDescription());
+            task.setCreationDate(taskDto.getCreationDate());
+            task.setCompletionDate(taskDto.getCompletionDate());
+            task.setStatus(taskDto.getStatus());
+            task.setUser(user);
+            task.setProject(project);
+            Task postedTask = taskRepository.save(task);
+            TaskDto postedTaskDto = new TaskDto();
+            postedTaskDto.setId(postedTask.getId());
+            return postedTaskDto;
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteTask(Long taskId, String email) {
+        Optional<Task> optionalTask = taskRepository.findByUserEmailAndId(email, taskId);
+        if (optionalTask.isPresent()) {
+            taskRepository.deleteById(optionalTask.get().getId());
+        } else {
+            throw new IllegalArgumentException("Task with id: " + taskId + " not found");
+        }
+    }
+
+    @Override
+    public TaskDto updateTask(Long taskId, TaskDto taskDto, String email) {
+       Optional<Task> optionalTask = taskRepository.findByUserEmailAndId(email, taskId);
+       if (optionalTask.isPresent()) {
+           Task task = optionalTask.get();
+           task.setName(taskDto.getName());
+           task.setDescription(taskDto.getDescription());
+           task.setCreationDate(taskDto.getCreationDate());
+           task.setCompletionDate(taskDto.getCompletionDate());
+           task.setStatus(taskDto.getStatus());
+           Task updatedTask = taskRepository.save(task);
+           return updatedTask.getTaskDto();
+       }
+       return null;
     }
 }
