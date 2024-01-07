@@ -8,6 +8,7 @@ import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.AuthService;
 import com.alkl1m.taskmanager.service.jwt.UserDetailsServiceImpl;
+import com.alkl1m.taskmanager.util.JwtUserDetails;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class AuthController {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not active");
             return null;
         }
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        final JwtUserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String jwt = jwtUtil.generateToken(userDetails);
         Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
