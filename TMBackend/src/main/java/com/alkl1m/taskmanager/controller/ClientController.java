@@ -2,7 +2,8 @@ package com.alkl1m.taskmanager.controller;
 
 import com.alkl1m.taskmanager.dto.ProjectDto;
 import com.alkl1m.taskmanager.dto.TaskDto;
-import com.alkl1m.taskmanager.service.client.ClientService;
+import com.alkl1m.taskmanager.service.project.ProjectService;
+import com.alkl1m.taskmanager.service.task.TaskService;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +17,14 @@ import java.util.List;
 @RequestMapping("/api/client")
 @RequiredArgsConstructor
 public class ClientController {
-    private final ClientService clientService;
+    private final ProjectService projectService;
+    private final TaskService taskService;
     private final HttpServletRequest httpServletRequest;
     private final JwtUtil jwtUtil;
 
     @GetMapping("/projects")
     public ResponseEntity<List<ProjectDto>> getAllProjects() {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        List<ProjectDto> projectDtoList = clientService.getProjectsByUserEmail(email);
+        List<ProjectDto> projectDtoList = projectService.getProjectsByUserId();
         if (projectDtoList == null) {
             return ResponseEntity.notFound().build();
         }
@@ -33,9 +33,7 @@ public class ClientController {
 
     @PostMapping("/projects")
     public ResponseEntity<?> postProject(@RequestBody ProjectDto projectDto) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        ProjectDto cratedProjectDto = clientService.postProject(projectDto, email);
+        ProjectDto cratedProjectDto = projectService.postProject(projectDto);
         if (cratedProjectDto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
         }
@@ -44,18 +42,14 @@ public class ClientController {
 
     @DeleteMapping("/projects")
     public ResponseEntity<Void> deleteProject(@RequestParam("projectId") Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        clientService.deleteProject(projectId, email);
+        projectService.deleteProject(projectId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/projects")
     public ResponseEntity<?> updateProject(@RequestParam("projectId") Long projectId,
                                            @RequestBody ProjectDto projectDto) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        ProjectDto updatedProjectDto = clientService.updateProject(projectId, projectDto, email);
+        ProjectDto updatedProjectDto = projectService.updateProject(projectId, projectDto);
         if (updatedProjectDto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
         }
@@ -64,9 +58,7 @@ public class ClientController {
 
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<List<TaskDto>> getAllTasks(@PathVariable Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        List<TaskDto> taskDtoList = clientService.getTasksByProjectId(projectId, email);
+        List<TaskDto> taskDtoList = taskService.getTasksByProjectId(projectId);
         if (taskDtoList == null) {
             return ResponseEntity.notFound().build();
         }
@@ -75,9 +67,7 @@ public class ClientController {
 
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> postTask(@PathVariable Long projectId, @RequestBody TaskDto taskDto) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        TaskDto createdTaskDto = clientService.postTask(taskDto, email, projectId);
+        TaskDto createdTaskDto = taskService.postTask(taskDto, projectId);
         if (createdTaskDto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
         }
@@ -86,18 +76,14 @@ public class ClientController {
 
     @DeleteMapping("/projects/{projectId}/tasks")
     public ResponseEntity<Void> deleteTask(@RequestParam("taskId") Long taskId, @PathVariable String projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        clientService.deleteTask(taskId, email);
+        taskService.deleteTask(taskId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/projects/{projectId}/tasks")
     public ResponseEntity<?> updateTask(@RequestParam("taskId") Long taskId,
                                         @RequestBody TaskDto taskDto, @PathVariable String projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        String email = jwtUtil.extractUserName(token);
-        TaskDto updatedTaskDto = clientService.updateTask(taskId, taskDto, email);
+        TaskDto updatedTaskDto = taskService.updateTask(taskId, taskDto);
         if (updatedTaskDto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
         }
