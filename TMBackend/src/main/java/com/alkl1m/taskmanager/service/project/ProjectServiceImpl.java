@@ -1,92 +1,102 @@
 package com.alkl1m.taskmanager.service.project;
 
-import com.alkl1m.taskmanager.dto.ProjectDto;
+import com.alkl1m.taskmanager.dto.*;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
+import com.alkl1m.taskmanager.enums.Status;
+import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
     private final JwtUtil jwtUtil;
-    @Override
-    public List<ProjectDto> getAllProjects() {
-        return projectRepository.findAll().stream().map(Project::getProjectDto).collect(Collectors.toList());
+
+    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository, HttpServletRequest httpServletRequest, JwtUtil jwtUtil) {
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
+        this.httpServletRequest = httpServletRequest;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public List<ProjectDto> getProjectsByName(String name) {
-        return projectRepository.findAllByNameContaining(name).stream().map(Project::getProjectDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProjectDto> getProjectsByUserId() {
+    public ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<User> optionalUser = userRepository.findById(userId);
-        List<Project> projects = projectRepository.findByUser(optionalUser.get());
-        return projects.stream()
-                .map(Project::getProjectDto)
-                .collect(Collectors.toList());
+        Optional<User> user = userRepository.findById(userId);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
+        Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
+        Page<ProjectDto> page = projectRepository.findProjects(user.get(), pageable);
+        return new ProjectsPagedResult<>(
+                page.getContent(),
+                page.getTotalElements(),
+                page.getNumber() + 1,
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast(),
+                page.hasNext(),
+                page.hasPrevious()
+        );
     }
 
     @Override
-    public ProjectDto postProject(ProjectDto projectDto) {
+    @Transactional
+    public ProjectDto create(CreateProjectCommand cmd) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> user = userRepository.findById(userId);
         Project project = new Project();
-        project.setName(projectDto.getName());
-        project.setDescription(projectDto.getDescription());
-        project.setCreationDate(projectDto.getCreationDate());
-        project.setCompletionDate(projectDto.getCompletionDate());
-        project.setStatus(projectDto.getStatus());
-        project.setUser(optionalUser.get());
-        Project postedProject = projectRepository.save(project);
-        ProjectDto postedProjectDto = new ProjectDto();
-        postedProjectDto.setId(postedProject.getId());
-        return postedProjectDto;
+        project.setName(cmd.name());
+        project.setDescription(cmd.description());
+        project.setCreatedAt(Instant.now());
+        project.setStatus(Status.IN_WORK);
+        project.setUser(user.get());
+        return ProjectDto.from(projectRepository.save(project));
     }
 
     @Override
-    public void deleteProject(Long projectId) {
+    @Transactional
+    public void update(UpdateProjectCommand cmd) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<Project> optionalProject = projectRepository.findByUserIdAndId(userId, projectId);
-        if (optionalProject.isPresent()) {
-            projectRepository.deleteById(optionalProject.get().getId());
+        Project project = projectRepository.findById(cmd.id())
+                .orElseThrow(() -> ProjectNotFoundException.of(cmd.id()));
+        project.setName(cmd.name());
+        project.setDescription(cmd.description());
+        if (project.getUser().getId().equals(userId)) {
+            projectRepository.save(project);
         } else {
-            throw new IllegalArgumentException("Project with id: " + projectId + " not found");
+            // ToDo add exception
         }
     }
 
     @Override
-    public ProjectDto updateProject(Long projectId, ProjectDto projectDto) {
+    @Transactional
+    public void delete(Long id) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<Project> optionalProject = projectRepository.findByUserIdAndId(userId, projectId);
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-            project.setName(projectDto.getName());
-            project.setDescription(projectDto.getDescription());
-            project.setCreationDate(projectDto.getCreationDate());
-            project.setCompletionDate(projectDto.getCompletionDate());
-            project.setStatus(projectDto.getStatus());
-            Project updatedProject = projectRepository.save(project);
-            return updatedProject.getProjectDto();
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> ProjectNotFoundException.of(id));
+        if (project.getUser().getId().equals(userId)) {
+            projectRepository.delete(project);
+        } else {
+            // ToDo add exception
         }
-        return null;
     }
 }

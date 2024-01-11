@@ -1,15 +1,23 @@
 package com.alkl1m.taskmanager.dto;
 
-import lombok.Data;
+import com.alkl1m.taskmanager.entity.Project;
+import com.alkl1m.taskmanager.enums.Status;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
-@Data
-public class ProjectDto {
-    private Long id;
-    private String name;
-    private String description;
-    private LocalDate creationDate;
-    private LocalDate completionDate;
-    private String status;
+public record ProjectDto(Long id,
+                         String name,
+                         String description,
+                         Instant createdAt,
+                         Instant doneAt,
+                         Status status) {
+    public static ProjectDto from(Project project) {
+        return new ProjectDto(project.getId(),
+                project.getName(),
+                project.getDescription(),
+                project.getCreatedAt(),
+                project.getDoneAt(),
+                project.getStatus()
+        );
+    }
 }

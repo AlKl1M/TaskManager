@@ -48,22 +48,19 @@ public class AuthController {
     @PostMapping("/login")
     public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest, HttpServletResponse response) throws IOException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.email(), authenticationRequest.password()));
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Incorrect username of password");
         } catch (DisabledException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not active");
             return null;
         }
-        final JwtUserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        final JwtUserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.email());
         final String jwt = jwtUtil.generateToken(userDetails);
         Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-        if (optionalUser.isPresent()) {
-            authenticationResponse.setJwt(jwt);
-            authenticationResponse.setUserRole(optionalUser.get().getUserRole());
-            authenticationResponse.setUserId(optionalUser.get().getId());
-        }
-        return authenticationResponse;
+
+        return optionalUser.map(user -> new AuthenticationResponse(jwt,
+                user.getUserRole(),
+                user.getId())).orElse(null);
     }
 }

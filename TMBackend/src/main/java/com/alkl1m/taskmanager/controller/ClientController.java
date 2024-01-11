@@ -1,16 +1,19 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.ProjectDto;
-import com.alkl1m.taskmanager.dto.TaskDto;
+import com.alkl1m.taskmanager.dto.*;
 import com.alkl1m.taskmanager.service.project.ProjectService;
 import com.alkl1m.taskmanager.service.task.TaskService;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -19,41 +22,36 @@ import java.util.List;
 public class ClientController {
     private final ProjectService projectService;
     private final TaskService taskService;
-    private final HttpServletRequest httpServletRequest;
-    private final JwtUtil jwtUtil;
 
     @GetMapping("/projects")
-    public ResponseEntity<List<ProjectDto>> getAllProjects() {
-        List<ProjectDto> projectDtoList = projectService.getProjectsByUserId();
-        if (projectDtoList == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(projectDtoList);
+    ProjectsPagedResult<ProjectDto> findProjects(
+            @RequestParam(name = "page", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "size", defaultValue = "10") Integer pageSize) {
+        FindProjectsQuery query = new FindProjectsQuery(pageNo, pageSize);
+        return projectService.findProjects(query);
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<?> postProject(@RequestBody ProjectDto projectDto) {
-        ProjectDto cratedProjectDto = projectService.postProject(projectDto);
-        if (cratedProjectDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
-        }
-        return ResponseEntity.ok(projectDto);
+    ResponseEntity<ProjectDto> create(@RequestBody @Validated CreateProjectRequest request) {
+        CreateProjectCommand cmd = new CreateProjectCommand(request.name(), request.description());
+        ProjectDto project = projectService.create(cmd);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/api/projects/{id}")
+                .buildAndExpand(project.id()).toUri();
+        return ResponseEntity.created(location).body(project);
     }
 
-    @DeleteMapping("/projects")
-    public ResponseEntity<Void> deleteProject(@RequestParam("projectId") Long projectId) {
-        projectService.deleteProject(projectId);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/projects/{id}")
+    void update(@PathVariable(name = "id") Long id,
+                @RequestBody @Validated UpdateProjectRequest request) {
+        UpdateProjectCommand cmd = new UpdateProjectCommand(id, request.name(), request.description());
+        projectService.update(cmd);
     }
 
-    @PutMapping("/projects")
-    public ResponseEntity<?> updateProject(@RequestParam("projectId") Long projectId,
-                                           @RequestBody ProjectDto projectDto) {
-        ProjectDto updatedProjectDto = projectService.updateProject(projectId, projectDto);
-        if (updatedProjectDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedProjectDto);
+    @DeleteMapping("/projects/{id}")
+    void delete(@PathVariable(name = "id") Long id) {
+        projectService.delete(id);
     }
 
     @GetMapping("/projects/{projectId}/tasks")
