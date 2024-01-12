@@ -1,13 +1,13 @@
 package com.alkl1m.taskmanager.entity;
 
-import com.alkl1m.taskmanager.dto.TaskDto;
+import com.alkl1m.taskmanager.enums.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @Data
@@ -16,11 +16,16 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String description;
-    private LocalDate creationDate;
-    private LocalDate completionDate;
-    private String status;
+    @Column(name="created_at", nullable = false)
+    private Instant createdAt;
+    @Column(name="done_at")
+    private Instant doneAt;
+    @Column(nullable = false)
+    private Status status;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
     @JoinColumn(name="project_id", nullable = false)
@@ -33,16 +38,5 @@ public class Task {
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JsonIgnore
     private User user;
-
-    public TaskDto getTaskDto() {
-        TaskDto taskDto = new TaskDto();
-        taskDto.setId(id);
-        taskDto.setName(name);
-        taskDto.setDescription(description);
-        taskDto.setCreationDate(creationDate);
-        taskDto.setCompletionDate(completionDate);
-        taskDto.setStatus(status);
-        return taskDto;
-    }
 }
 

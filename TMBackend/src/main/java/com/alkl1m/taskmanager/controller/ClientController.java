@@ -3,18 +3,13 @@ package com.alkl1m.taskmanager.controller;
 import com.alkl1m.taskmanager.dto.*;
 import com.alkl1m.taskmanager.service.project.ProjectService;
 import com.alkl1m.taskmanager.service.task.TaskService;
-import com.alkl1m.taskmanager.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/client")
@@ -55,36 +50,37 @@ public class ClientController {
     }
 
     @GetMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<List<TaskDto>> getAllTasks(@PathVariable Long projectId) {
-        List<TaskDto> taskDtoList = taskService.getTasksByProjectId(projectId);
-        if (taskDtoList == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(taskDtoList);
+    TasksPagedResult<TaskDto> findTasks(
+            @PathVariable Long projectId,
+            @RequestParam(name = "page", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "size", defaultValue = "10") Integer pageSize) {
+        FindTasksQuery query = new FindTasksQuery(pageNo, pageSize);
+        return taskService.findTasks(query, projectId);
     }
 
     @PostMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<?> postTask(@PathVariable Long projectId, @RequestBody TaskDto taskDto) {
-        TaskDto createdTaskDto = taskService.postTask(taskDto, projectId);
-        if (createdTaskDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
-        }
-        return ResponseEntity.ok(taskDto);
+    ResponseEntity<TaskDto> create(@PathVariable Long projectId,
+            @RequestBody @Validated CreateTaskRequest request) {
+        CreateTaskCommand cmd = new CreateTaskCommand(request.name(), request.description());
+        TaskDto task = taskService.create(cmd, projectId);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/api/projects/{projectId}/tasks/{taskId}")
+                .buildAndExpand(projectId, task.id()).toUri();
+        return ResponseEntity.created(location).body(task);
     }
 
-    @DeleteMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<Void> deleteTask(@RequestParam("taskId") Long taskId, @PathVariable String projectId) {
-        taskService.deleteTask(taskId);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/projects/{projectId}/tasks/{id}")
+    void update(@PathVariable Long projectId,
+                @PathVariable Long id,
+                @RequestBody @Validated UpdateProjectRequest request) {
+        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description());
+        taskService.update(cmd, projectId);
     }
 
-    @PutMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<?> updateTask(@RequestParam("taskId") Long taskId,
-                                        @RequestBody TaskDto taskDto, @PathVariable String projectId) {
-        TaskDto updatedTaskDto = taskService.updateTask(taskId, taskDto);
-        if (updatedTaskDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedTaskDto);
+    @DeleteMapping("/projects/{projectId}/tasks/{id}")
+    void delete(@PathVariable Long projectId,
+                @PathVariable Long id) {
+        taskService.delete(id);
     }
 }
