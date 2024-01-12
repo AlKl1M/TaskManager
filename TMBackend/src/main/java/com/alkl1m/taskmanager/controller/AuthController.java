@@ -1,9 +1,9 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.AuthenticationRequest;
-import com.alkl1m.taskmanager.dto.AuthenticationResponse;
-import com.alkl1m.taskmanager.dto.SignupRequest;
-import com.alkl1m.taskmanager.dto.UserDto;
+import com.alkl1m.taskmanager.dto.auth.AuthenticationRequest;
+import com.alkl1m.taskmanager.dto.auth.AuthenticationResponse;
+import com.alkl1m.taskmanager.dto.auth.SignupRequest;
+import com.alkl1m.taskmanager.dto.auth.UserDto;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.AuthService;

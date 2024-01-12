@@ -1,7 +1,7 @@
 package com.alkl1m.taskmanager.service.auth;
 
-import com.alkl1m.taskmanager.dto.SignupRequest;
-import com.alkl1m.taskmanager.dto.UserDto;
+import com.alkl1m.taskmanager.dto.auth.SignupRequest;
+import com.alkl1m.taskmanager.dto.auth.UserDto;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.UserRole;
 import com.alkl1m.taskmanager.repository.UserRepository;

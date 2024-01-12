@@ -1,12 +1,16 @@
 package com.alkl1m.taskmanager.service.task;
 
-import com.alkl1m.taskmanager.dto.*;
+import com.alkl1m.taskmanager.dto.task.CreateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.UpdateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.FindTasksQuery;
+import com.alkl1m.taskmanager.dto.task.TaskDto;
+import com.alkl1m.taskmanager.dto.task.TasksPagedResult;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
-import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.exception.TaskNotFoundException;
+import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.TaskRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
@@ -43,8 +47,8 @@ public class TaskServiceImpl implements TaskService {
     public TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<Project> project = projectRepository.findById(projectId);
         Optional<User> user = userRepository.findById(userId);
+        Optional<Project> project = projectRepository.findById(projectId);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
         Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
@@ -90,7 +94,7 @@ public class TaskServiceImpl implements TaskService {
         if (task.getUser().getId().equals(userId)) {
             taskRepository.save(task);
         } else {
-            // ToDo add exception
+            throw new UnauthorizedAccessException();
         }
     }
 
@@ -104,7 +108,7 @@ public class TaskServiceImpl implements TaskService {
         if (task.getUser().getId().equals(userId)) {
             taskRepository.delete(task);
         } else {
-            // ToDo add exception
+            throw new UnauthorizedAccessException();
         }
     }
 }

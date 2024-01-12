@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.repository;
 
-import com.alkl1m.taskmanager.dto.ProjectDto;
+import com.alkl1m.taskmanager.dto.project.ProjectDto;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import org.springframework.data.domain.Page;

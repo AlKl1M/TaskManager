@@ -1,6 +1,9 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.*;
+import com.alkl1m.taskmanager.dto.project.*;
+import com.alkl1m.taskmanager.dto.task.*;
+import com.alkl1m.taskmanager.dto.project.UpdateProjectCommand;
+import com.alkl1m.taskmanager.dto.task.UpdateTaskCommand;
 import com.alkl1m.taskmanager.service.project.ProjectService;
 import com.alkl1m.taskmanager.service.task.TaskService;
 import lombok.RequiredArgsConstructor;

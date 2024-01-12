@@ -1,10 +1,15 @@
 package com.alkl1m.taskmanager.service.project;
 
-import com.alkl1m.taskmanager.dto.*;
+import com.alkl1m.taskmanager.dto.project.CreateProjectCommand;
+import com.alkl1m.taskmanager.dto.project.UpdateProjectCommand;
+import com.alkl1m.taskmanager.dto.project.FindProjectsQuery;
+import com.alkl1m.taskmanager.dto.project.ProjectDto;
+import com.alkl1m.taskmanager.dto.project.ProjectsPagedResult;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
+import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.util.JwtUtil;
@@ -82,7 +87,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (project.getUser().getId().equals(userId)) {
             projectRepository.save(project);
         } else {
-            // ToDo add exception
+            throw new UnauthorizedAccessException();
         }
     }
 
@@ -96,7 +101,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (project.getUser().getId().equals(userId)) {
             projectRepository.delete(project);
         } else {
-            // ToDo add exception
+            throw new UnauthorizedAccessException();
         }
     }
 }

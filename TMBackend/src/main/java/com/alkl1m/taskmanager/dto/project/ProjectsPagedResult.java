@@ -1,10 +1,10 @@
-package com.alkl1m.taskmanager.dto;
+package com.alkl1m.taskmanager.dto.project;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public record TasksPagedResult<T>(
+public record ProjectsPagedResult<T>(
         List<T> data,
         long totalElements,
         int pageNumber,

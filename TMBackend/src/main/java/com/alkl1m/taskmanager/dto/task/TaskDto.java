@@ -1,9 +1,7 @@
-package com.alkl1m.taskmanager.dto;
+package com.alkl1m.taskmanager.dto.task;
 
-import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.enums.Status;
-import lombok.Data;
 
 import java.time.Instant;
 

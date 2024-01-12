@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.dto;
+package com.alkl1m.taskmanager.dto.project;
 
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.enums.Status;
