@@ -11,4 +11,5 @@ public interface ProjectService {
     ProjectDto create(CreateProjectCommand cmd);
     void update(UpdateProjectCommand cmd);
     void delete(Long id);
+    void changeStatus(Long id);
 }

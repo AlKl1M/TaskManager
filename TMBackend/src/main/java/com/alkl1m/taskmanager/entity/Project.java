@@ -25,6 +25,7 @@ public class Project {
     @Column(name="done_at")
     private Instant doneAt;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)

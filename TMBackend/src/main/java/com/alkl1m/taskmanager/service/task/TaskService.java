@@ -11,4 +11,5 @@ public interface TaskService {
     TaskDto create(CreateTaskCommand cmd, Long projectId);
     void update(UpdateTaskCommand cmd, Long projectId);
     void delete(Long id);
+    void changeStatus(Long id);
 }

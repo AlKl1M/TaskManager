@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
                 SELECT 
-                new com.alkl1m.taskmanager.dto.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.status)
+                new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.status)
                 FROM Task b
                 WHERE b.user = :user and  b.project = :project
             """)

@@ -9,6 +9,7 @@ import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
+import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.exception.TaskNotFoundException;
 import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -49,20 +51,24 @@ public class TaskServiceImpl implements TaskService {
         Long userId = jwtUtil.extractId(token);
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
-        Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
-        Page<TaskDto> page = taskRepository.findTasks(user.get(), project.get(), pageable);
-        return new TasksPagedResult<>(
-                page.getContent(),
-                page.getTotalElements(),
-                page.getNumber() + 1,
-                page.getTotalPages(),
-                page.isFirst(),
-                page.isLast(),
-                page.hasNext(),
-                page.hasPrevious()
-        );
+        if (user.isPresent() || project.isPresent()) {
+            Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+            int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
+            Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
+            Page<TaskDto> page = taskRepository.findTasks(user.get(), project.get(), pageable);
+            return new TasksPagedResult<>(
+                    page.getContent(),
+                    page.getTotalElements(),
+                    page.getNumber() + 1,
+                    page.getTotalPages(),
+                    page.isFirst(),
+                    page.isLast(),
+                    page.hasNext(),
+                    page.hasPrevious()
+            );
+        } else {
+            return new TasksPagedResult<>(Collections.emptyList(), 0, 0, 0, true, true, false, false);
+        }
     }
 
     @Override
@@ -72,14 +78,18 @@ public class TaskServiceImpl implements TaskService {
         Long userId = jwtUtil.extractId(token);
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
-        Task task = new Task();
-        task.setName(cmd.name());
-        task.setDescription(cmd.description());
-        task.setCreatedAt(Instant.now());
-        task.setStatus(Status.IN_WORK);
-        task.setUser(user.get());
-        task.setProject(project.get());
-        return TaskDto.from(taskRepository.save(task));
+        if (user.isPresent()) {
+            Task task = new Task();
+            task.setName(cmd.name());
+            task.setDescription(cmd.description());
+            task.setCreatedAt(Instant.now());
+            task.setStatus(Status.IN_WORK);
+            task.setUser(user.get());
+            task.setProject(project.get());
+            return TaskDto.from(taskRepository.save(task));
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -107,6 +117,21 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> TaskNotFoundException.of(id));
         if (task.getUser().getId().equals(userId)) {
             taskRepository.delete(task);
+        } else {
+            throw new UnauthorizedAccessException();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void changeStatus(Long id) {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = jwtUtil.extractId(token);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> ProjectNotFoundException.of(id));
+        if (task.getUser().getId().equals(userId)) {
+            task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+            taskRepository.save(task);
         } else {
             throw new UnauthorizedAccessException();
         }

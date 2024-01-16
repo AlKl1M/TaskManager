@@ -3,7 +3,6 @@ package com.alkl1m.taskmanager.controller;
 import com.alkl1m.taskmanager.dto.project.UpdateProjectRequest;
 import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.service.task.TaskService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +12,12 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/client")
-@RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
+
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @GetMapping("/projects/{projectId}/tasks")
     TasksPagedResult<TaskDto> findTasks(
@@ -50,5 +52,11 @@ public class TaskController {
     void delete(@PathVariable Long projectId,
                 @PathVariable Long id) {
         taskService.delete(id);
+    }
+
+    @PutMapping("/projects/{taskId}/tasks/{id}/done")
+    void changeStatus(@PathVariable Long projectId,
+                      @PathVariable Long id) {
+        taskService.changeStatus(id);
     }
 }
