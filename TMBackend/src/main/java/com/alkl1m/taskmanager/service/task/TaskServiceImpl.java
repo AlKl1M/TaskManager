@@ -1,91 +1,139 @@
 package com.alkl1m.taskmanager.service.task;
 
-import com.alkl1m.taskmanager.dto.TaskDto;
+import com.alkl1m.taskmanager.dto.task.CreateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.UpdateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.FindTasksQuery;
+import com.alkl1m.taskmanager.dto.task.TaskDto;
+import com.alkl1m.taskmanager.dto.task.TasksPagedResult;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
+import com.alkl1m.taskmanager.enums.Status;
+import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
+import com.alkl1m.taskmanager.exception.TaskNotFoundException;
+import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.TaskRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
     private final JwtUtil jwtUtil;
-    @Override
-    public List<TaskDto> getTasksByProjectId(Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
-        Optional<User> optionalUser = userRepository.findById(userId);
-        List<Task> tasks = taskRepository.findByProjectIdAndUser(projectId, optionalUser.get());
-        return tasks.stream()
-                .map(Task::getTaskDto)
-                .collect(Collectors.toList());
+
+    public TaskServiceImpl(TaskRepository taskRepository, ProjectRepository projectRepository, UserRepository userRepository, HttpServletRequest httpServletRequest, JwtUtil jwtUtil) {
+        this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
+        this.httpServletRequest = httpServletRequest;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public TaskDto postTask(TaskDto taskDto, Long projectId) {
+    public TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<User> optionalUser = userRepository.findById(userId);
-        Task task = new Task();
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-            task.setName(taskDto.getName());
-            task.setDescription(taskDto.getDescription());
-            task.setCreationDate(taskDto.getCreationDate());
-            task.setCompletionDate(taskDto.getCompletionDate());
-            task.setStatus(taskDto.getStatus());
-            task.setUser(optionalUser.get());
-            task.setProject(project);
-            Task postedTask = taskRepository.save(task);
-            TaskDto postedTaskDto = new TaskDto();
-            postedTaskDto.setId(postedTask.getId());
-            return postedTaskDto;
-        }
-        return null;
-    }
-
-    @Override
-    public void deleteTask(Long taskId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
-        Optional<Task> optionalTask = taskRepository.findByUserIdAndId(userId, taskId);
-        if (optionalTask.isPresent()) {
-            taskRepository.deleteById(optionalTask.get().getId());
+        Optional<User> user = userRepository.findById(userId);
+        Optional<Project> project = projectRepository.findById(projectId);
+        if (user.isPresent() || project.isPresent()) {
+            Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+            int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
+            Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
+            Page<TaskDto> page = taskRepository.findTasks(user.get(), project.get(), pageable);
+            return new TasksPagedResult<>(
+                    page.getContent(),
+                    page.getTotalElements(),
+                    page.getNumber() + 1,
+                    page.getTotalPages(),
+                    page.isFirst(),
+                    page.isLast(),
+                    page.hasNext(),
+                    page.hasPrevious()
+            );
         } else {
-            throw new IllegalArgumentException("Task with id: " + taskId + " not found");
+            return new TasksPagedResult<>(Collections.emptyList(), 0, 0, 0, true, true, false, false);
         }
     }
 
     @Override
-    public TaskDto updateTask(Long taskId, TaskDto taskDto) {
+    @Transactional
+    public TaskDto create(CreateTaskCommand cmd, Long projectId) {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         Long userId = jwtUtil.extractId(token);
-        Optional<Task> optionalTask = taskRepository.findByUserIdAndId(userId, taskId);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            task.setName(taskDto.getName());
-            task.setDescription(taskDto.getDescription());
-            task.setCreationDate(taskDto.getCreationDate());
-            task.setCompletionDate(taskDto.getCompletionDate());
-            task.setStatus(taskDto.getStatus());
-            Task updatedTask = taskRepository.save(task);
-            return updatedTask.getTaskDto();
+        Optional<User> user = userRepository.findById(userId);
+        Optional<Project> project = projectRepository.findById(projectId);
+        if (user.isPresent()) {
+            Task task = new Task();
+            task.setName(cmd.name());
+            task.setDescription(cmd.description());
+            task.setCreatedAt(Instant.now());
+            task.setStatus(Status.IN_WORK);
+            task.setUser(user.get());
+            task.setProject(project.get());
+            return TaskDto.from(taskRepository.save(task));
+        } else {
+            return null;
         }
-        return null;
+    }
+
+    @Override
+    @Transactional
+    public void update(UpdateTaskCommand cmd, Long projectId) {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = jwtUtil.extractId(token);
+        Task task = taskRepository.findById(cmd.id())
+                .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
+        task.setName(cmd.name());
+        task.setDescription(cmd.description());
+        if (task.getUser().getId().equals(userId)) {
+            taskRepository.save(task);
+        } else {
+            throw new UnauthorizedAccessException();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = jwtUtil.extractId(token);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> TaskNotFoundException.of(id));
+        if (task.getUser().getId().equals(userId)) {
+            taskRepository.delete(task);
+        } else {
+            throw new UnauthorizedAccessException();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void changeStatus(Long id) {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = jwtUtil.extractId(token);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> ProjectNotFoundException.of(id));
+        if (task.getUser().getId().equals(userId)) {
+            task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+            taskRepository.save(task);
+        } else {
+            throw new UnauthorizedAccessException();
+        }
     }
 }

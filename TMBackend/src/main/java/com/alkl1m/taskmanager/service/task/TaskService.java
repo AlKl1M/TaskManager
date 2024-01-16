@@ -1,12 +1,15 @@
 package com.alkl1m.taskmanager.service.task;
 
-import com.alkl1m.taskmanager.dto.TaskDto;
-
-import java.util.List;
+import com.alkl1m.taskmanager.dto.task.CreateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.UpdateTaskCommand;
+import com.alkl1m.taskmanager.dto.task.FindTasksQuery;
+import com.alkl1m.taskmanager.dto.task.TaskDto;
+import com.alkl1m.taskmanager.dto.task.TasksPagedResult;
 
 public interface TaskService {
-    List<TaskDto> getTasksByProjectId(Long projectId);
-    TaskDto postTask(TaskDto taskDto, Long projectId);
-    void deleteTask(Long taskId);
-    TaskDto updateTask(Long taskId, TaskDto taskDto);
+    TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId);
+    TaskDto create(CreateTaskCommand cmd, Long projectId);
+    void update(UpdateTaskCommand cmd, Long projectId);
+    void delete(Long id);
+    void changeStatus(Long id);
 }

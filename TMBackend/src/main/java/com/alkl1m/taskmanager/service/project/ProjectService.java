@@ -1,14 +1,15 @@
 package com.alkl1m.taskmanager.service.project;
 
-import com.alkl1m.taskmanager.dto.ProjectDto;
-
-import java.util.List;
+import com.alkl1m.taskmanager.dto.project.CreateProjectCommand;
+import com.alkl1m.taskmanager.dto.project.UpdateProjectCommand;
+import com.alkl1m.taskmanager.dto.project.FindProjectsQuery;
+import com.alkl1m.taskmanager.dto.project.ProjectDto;
+import com.alkl1m.taskmanager.dto.project.ProjectsPagedResult;
 
 public interface ProjectService {
-    List<ProjectDto> getAllProjects();
-    List<ProjectDto> getProjectsByName(String name);
-    List<ProjectDto> getProjectsByUserId();
-    ProjectDto postProject(ProjectDto projectDto);
-    void deleteProject(Long projectId);
-    ProjectDto updateProject(Long projectId, ProjectDto projectDto);
+    ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query);
+    ProjectDto create(CreateProjectCommand cmd);
+    void update(UpdateProjectCommand cmd);
+    void delete(Long id);
+    void changeStatus(Long id);
 }

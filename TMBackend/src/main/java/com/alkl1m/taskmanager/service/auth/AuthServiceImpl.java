@@ -1,7 +1,7 @@
 package com.alkl1m.taskmanager.service.auth;
 
-import com.alkl1m.taskmanager.dto.SignupRequest;
-import com.alkl1m.taskmanager.dto.UserDto;
+import com.alkl1m.taskmanager.dto.auth.SignupRequest;
+import com.alkl1m.taskmanager.dto.auth.UserDto;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.UserRole;
 import com.alkl1m.taskmanager.repository.UserRepository;
@@ -33,9 +33,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserDto createUser(SignupRequest signupRequest) {
         User user = new User();
-        user.setName(signupRequest.getName());
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.getPassword()));
+        user.setName(signupRequest.name());
+        user.setEmail(signupRequest.email());
+        user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.password()));
         user.setUserRole(UserRole.CLIENT);
         User createdUser = userRepository.save(user);
         UserDto createdUserDto = new UserDto();
