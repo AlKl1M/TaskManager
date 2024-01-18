@@ -12,8 +12,6 @@ import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
-import com.alkl1m.taskmanager.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,27 +28,20 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
-    private final HttpServletRequest httpServletRequest;
-    private final JwtUtil jwtUtil;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository, HttpServletRequest httpServletRequest, JwtUtil jwtUtil) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
-        this.httpServletRequest = httpServletRequest;
-        this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
-        Optional<User> user = userRepository.findById(userId);
-
-        if (user.isPresent()) {
-            Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-            int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
-            Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
-            Page<ProjectDto> page = projectRepository.findProjects(user.get(), pageable);
+    public ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query, Long userId) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
+        Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
+        Optional<Page<ProjectDto>> optionalPage = projectRepository.findProjects(userId, pageable);
+        if (optionalPage.isPresent()) {
+            Page<ProjectDto> page = optionalPage.get();
             return new ProjectsPagedResult<>(
                     page.getContent(),
                     page.getTotalElements(),
@@ -61,16 +52,13 @@ public class ProjectServiceImpl implements ProjectService {
                     page.hasNext(),
                     page.hasPrevious()
             );
-        } else {
-            return new ProjectsPagedResult<>(Collections.emptyList(), 0, 0, 0, true, true, false, false);
         }
+        return new ProjectsPagedResult<>(Collections.emptyList(), 0, 0, 0, true, true, false, false);
     }
 
     @Override
     @Transactional
-    public ProjectDto create(CreateProjectCommand cmd) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public ProjectDto create(CreateProjectCommand cmd, Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
             Project project = new Project();
@@ -87,9 +75,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void update(UpdateProjectCommand cmd) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public void update(UpdateProjectCommand cmd, Long userId) {
         Project project = projectRepository.findById(cmd.id())
                 .orElseThrow(() -> ProjectNotFoundException.of(cmd.id()));
         project.setName(cmd.name());
@@ -103,9 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public void delete(Long id, Long userId) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
         if (project.getUser().getId().equals(userId)) {
@@ -117,16 +101,26 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void changeStatus(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public void changeStatus(Long id, Long userId) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
         if (project.getUser().getId().equals(userId)) {
-            project.setStatus(project.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+            if (project.getStatus().equals(Status.IN_WORK)){
+                project.setStatus(Status.DONE);
+                project.setDoneAt(Instant.now());
+            } else {
+                project.setStatus(Status.IN_WORK);
+                project.setDoneAt(null);
+            }
             projectRepository.save(project);
         } else {
             throw new UnauthorizedAccessException();
         }
+    }
+
+    @Override
+    public Project getProjectById(Long id, Long userId) {
+        Optional<Project> optionalProject = projectRepository.findById(id);
+        return optionalProject.orElse(null);
     }
 }

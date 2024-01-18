@@ -7,9 +7,9 @@ import com.alkl1m.taskmanager.dto.task.TaskDto;
 import com.alkl1m.taskmanager.dto.task.TasksPagedResult;
 
 public interface TaskService {
-    TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId);
-    TaskDto create(CreateTaskCommand cmd, Long projectId);
-    void update(UpdateTaskCommand cmd, Long projectId);
-    void delete(Long id);
-    void changeStatus(Long id);
+    TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId, Long userId);
+    TaskDto create(CreateTaskCommand cmd, Long projectId, Long userId);
+    void update(UpdateTaskCommand cmd, Long projectId, Long userId);
+    void delete(Long id, Long userId);
+    void changeStatus(Long id, Long userId);
 }

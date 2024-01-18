@@ -10,12 +10,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
                 SELECT 
                 new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.status)
                 FROM Task b
-                WHERE b.user = :user and  b.project = :project
+                WHERE b.user.id = :userId and  b.project.id = :projectId
             """)
-    Page<TaskDto> findTasks(@Param("user") User user, @Param("project") Project project, Pageable pageable);
+    Optional<Page<TaskDto>> findTasks(@Param("userId") Long userId, @Param("projectId") Long projectId, Pageable pageable);
 }
