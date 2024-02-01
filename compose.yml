@@ -1,0 +1,9 @@
+services:
+  db_pg_14:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: taskmanager_user
+      POSTGRES_PASSWORD: taskmanager_password
+    ports:
+      - 5432
