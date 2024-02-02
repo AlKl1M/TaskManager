@@ -2,6 +2,7 @@ package com.alkl1m.taskmanager.controller;
 
 import com.alkl1m.taskmanager.dto.project.*;
 import com.alkl1m.taskmanager.service.project.ProjectService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -10,13 +11,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/client")
+@RequiredArgsConstructor
+@RequestMapping("/api/user")
 public class ProjectController {
     private final ProjectService projectService;
-
-    public ProjectController(ProjectService projectService) {
-        this.projectService = projectService;
-    }
 
     @GetMapping("/projects")
     ProjectsPagedResult<ProjectDto> findProjects(
@@ -41,19 +39,22 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}")
-    void update(@PathVariable(name = "id") Long id,
+    ResponseEntity<ProjectDto> update(@PathVariable(name = "id") Long id,
                 @RequestBody @Validated UpdateProjectRequest request) {
         UpdateProjectCommand cmd = new UpdateProjectCommand(id, request.name(), request.description());
-        projectService.update(cmd);
+        ProjectDto project = projectService.update(cmd);
+        return ResponseEntity.ok(project);
     }
 
     @DeleteMapping("/projects/{id}")
-    void delete(@PathVariable(name = "id") Long id) {
+    ResponseEntity<String> delete(@PathVariable(name = "id") Long id) {
         projectService.delete(id);
+        return ResponseEntity.ok("Project deleted successfully");
     }
 
     @PutMapping("/projects/{id}/done")
-    void changeStatus(@PathVariable(name = "id") Long id) {
+    ResponseEntity<String> changeStatus(@PathVariable(name = "id") Long id) {
         projectService.changeStatus(id);
+        return ResponseEntity.ok("Project status changed successfully");
     }
 }

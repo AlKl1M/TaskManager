@@ -9,7 +9,7 @@ import com.alkl1m.taskmanager.dto.project.ProjectsPagedResult;
 public interface ProjectService {
     ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query);
     ProjectDto create(CreateProjectCommand cmd);
-    void update(UpdateProjectCommand cmd);
+    ProjectDto update(UpdateProjectCommand cmd);
     void delete(Long id);
     void changeStatus(Long id);
 }

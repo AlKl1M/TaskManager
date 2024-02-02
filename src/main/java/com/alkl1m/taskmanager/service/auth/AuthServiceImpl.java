@@ -9,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
@@ -19,8 +21,8 @@ public class AuthServiceImpl implements AuthService {
 
     @PostConstruct
     public void createAdminAccount() {
-        User adminAccount = userRepository.findByUserRole(UserRole.ADMIN);
-        if (adminAccount == null) {
+        Optional<User> adminAccount = userRepository.findByUserRole(UserRole.ADMIN);
+        if (adminAccount.isEmpty()) {
             User user = new User();
             user.setName("admin");
             user.setEmail("admin@test.com");
@@ -36,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         user.setName(signupRequest.name());
         user.setEmail(signupRequest.email());
         user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.password()));
-        user.setUserRole(UserRole.CLIENT);
+        user.setUserRole(UserRole.USER);
         User createdUser = userRepository.save(user);
         UserDto createdUserDto = new UserDto();
         createdUserDto.setId(createdUser.getId());

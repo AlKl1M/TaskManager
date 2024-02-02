@@ -17,6 +17,7 @@ import com.alkl1m.taskmanager.repository.TaskRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
@@ -37,18 +39,9 @@ public class TaskServiceImpl implements TaskService {
     private final HttpServletRequest httpServletRequest;
     private final JwtUtil jwtUtil;
 
-    public TaskServiceImpl(TaskRepository taskRepository, ProjectRepository projectRepository, UserRepository userRepository, HttpServletRequest httpServletRequest, JwtUtil jwtUtil) {
-        this.taskRepository = taskRepository;
-        this.projectRepository = projectRepository;
-        this.userRepository = userRepository;
-        this.httpServletRequest = httpServletRequest;
-        this.jwtUtil = jwtUtil;
-    }
-
     @Override
     public TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
         if (user.isPresent() || project.isPresent()) {
@@ -74,8 +67,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskDto create(CreateTaskCommand cmd, Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
         if (user.isPresent()) {
@@ -94,15 +86,14 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public void update(UpdateTaskCommand cmd, Long projectId) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public TaskDto update(UpdateTaskCommand cmd, Long projectId) {
+        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(cmd.id())
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
         task.setName(cmd.name());
         task.setDescription(cmd.description());
         if (task.getUser().getId().equals(userId)) {
-            taskRepository.save(task);
+            return TaskDto.from(taskRepository.save(task));
         } else {
             throw new UnauthorizedAccessException();
         }
@@ -111,8 +102,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void delete(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> TaskNotFoundException.of(id));
         if (task.getUser().getId().equals(userId)) {
@@ -125,8 +115,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void changeStatus(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
         if (task.getUser().getId().equals(userId)) {
@@ -135,5 +124,10 @@ public class TaskServiceImpl implements TaskService {
         } else {
             throw new UnauthorizedAccessException();
         }
+    }
+
+    private Long getUserIdFromToken() {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        return jwtUtil.extractId(token);
     }
 }

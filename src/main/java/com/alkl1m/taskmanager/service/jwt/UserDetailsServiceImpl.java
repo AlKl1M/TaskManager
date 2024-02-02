@@ -28,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (userOptional.isEmpty()) throw new UsernameNotFoundException("User not found", null);
         User user = userOptional.get();
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
-        grantedAuthorityList.add(new SimpleGrantedAuthority(UserRole.CLIENT.name()));
+        grantedAuthorityList.add(new SimpleGrantedAuthority(UserRole.USER.name()));
         return new JwtUserDetails(user.getId(), user.getName(), user.getPassword(), user.getEmail(), grantedAuthorityList);
     }
 }

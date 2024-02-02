@@ -29,7 +29,7 @@ public class JwtUserDetails implements UserDetails {
 
     public static JwtUserDetails create(User user) {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
-        grantedAuthorityList.add(new SimpleGrantedAuthority(UserRole.CLIENT.name()));
+        grantedAuthorityList.add(new SimpleGrantedAuthority(UserRole.USER.name()));
         return new JwtUserDetails(user.getId(), user.getName(), user.getPassword(), user.getEmail(), grantedAuthorityList);
     }
     @Override

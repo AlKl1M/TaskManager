@@ -14,6 +14,7 @@ import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
@@ -33,17 +35,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final HttpServletRequest httpServletRequest;
     private final JwtUtil jwtUtil;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository, UserRepository userRepository, HttpServletRequest httpServletRequest, JwtUtil jwtUtil) {
-        this.projectRepository = projectRepository;
-        this.userRepository = userRepository;
-        this.httpServletRequest = httpServletRequest;
-        this.jwtUtil = jwtUtil;
-    }
-
     @Override
     public ProjectsPagedResult<ProjectDto> findProjects(FindProjectsQuery query) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
 
         if (user.isPresent()) {
@@ -69,8 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto create(CreateProjectCommand cmd) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
             Project project = new Project();
@@ -87,15 +80,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public void update(UpdateProjectCommand cmd) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+    public ProjectDto update(UpdateProjectCommand cmd) {
+        Long userId = getUserIdFromToken();
         Project project = projectRepository.findById(cmd.id())
                 .orElseThrow(() -> ProjectNotFoundException.of(cmd.id()));
         project.setName(cmd.name());
         project.setDescription(cmd.description());
         if (project.getUser().getId().equals(userId)) {
-            projectRepository.save(project);
+            return ProjectDto.from(projectRepository.save(project));
         } else {
             throw new UnauthorizedAccessException();
         }
@@ -104,8 +96,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void delete(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
         if (project.getUser().getId().equals(userId)) {
@@ -118,8 +109,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void changeStatus(Long id) {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        Long userId = jwtUtil.extractId(token);
+        Long userId = getUserIdFromToken();
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
         if (project.getUser().getId().equals(userId)) {
@@ -128,5 +118,10 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             throw new UnauthorizedAccessException();
         }
+    }
+
+    private Long getUserIdFromToken() {
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        return jwtUtil.extractId(token);
     }
 }

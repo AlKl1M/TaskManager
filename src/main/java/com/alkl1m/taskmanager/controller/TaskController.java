@@ -3,6 +3,7 @@ package com.alkl1m.taskmanager.controller;
 import com.alkl1m.taskmanager.dto.project.UpdateProjectRequest;
 import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.service.task.TaskService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -11,13 +12,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/client")
 public class TaskController {
     private final TaskService taskService;
-
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
-    }
 
     @GetMapping("/projects/{projectId}/tasks")
     TasksPagedResult<TaskDto> findTasks(
@@ -49,14 +47,13 @@ public class TaskController {
     }
 
     @DeleteMapping("/projects/{projectId}/tasks/{id}")
-    void delete(@PathVariable Long projectId,
-                @PathVariable Long id) {
+    ResponseEntity<String> delete(@PathVariable Long id) {
         taskService.delete(id);
+        return ResponseEntity.ok("Task deleted successfully");
     }
-
     @PutMapping("/projects/{taskId}/tasks/{id}/done")
-    void changeStatus(@PathVariable Long projectId,
-                      @PathVariable Long id) {
+    ResponseEntity<String> changeStatus(@PathVariable Long id) {
         taskService.changeStatus(id);
+        return ResponseEntity.ok("Task status changed successfully");
     }
 }
