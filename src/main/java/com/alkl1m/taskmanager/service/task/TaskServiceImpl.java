@@ -1,10 +1,6 @@
 package com.alkl1m.taskmanager.service.task;
 
-import com.alkl1m.taskmanager.dto.task.CreateTaskCommand;
-import com.alkl1m.taskmanager.dto.task.UpdateTaskCommand;
-import com.alkl1m.taskmanager.dto.task.FindTasksQuery;
-import com.alkl1m.taskmanager.dto.task.TaskDto;
-import com.alkl1m.taskmanager.dto.task.TasksPagedResult;
+import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
@@ -26,8 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,17 +35,21 @@ public class TaskServiceImpl implements TaskService {
     private final JwtUtil jwtUtil;
 
     @Override
-    public TasksPagedResult<TaskDto> findTasks(FindTasksQuery query, Long projectId) {
+    public TasksPagedResult<CreateBackTaskRequest> findTasks(FindTasksQuery query, Long projectId) {
         Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
-        if (user.isPresent() || project.isPresent()) {
+        if (user.isPresent() && project.isPresent()) {
             Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
             int pageNo = query.pageNo() > 0 ? query.pageNo() - 1 : 0;
             Pageable pageable = PageRequest.of(pageNo, query.pageSize(), sort);
             Page<TaskDto> page = taskRepository.findTasks(user.get(), project.get(), pageable);
+            ArrayList<CreateBackTaskRequest> newData = new ArrayList<>(query.pageSize());
+            for(TaskDto req: page.getContent()){
+                newData.add(CreateBackTaskRequest.from(req));
+            }
             return new TasksPagedResult<>(
-                    page.getContent(),
+                    newData,
                     page.getTotalElements(),
                     page.getNumber() + 1,
                     page.getTotalPages(),
@@ -60,7 +59,8 @@ public class TaskServiceImpl implements TaskService {
                     page.hasPrevious()
             );
         } else {
-            return new TasksPagedResult<>(Collections.emptyList(), 0, 0, 0, true, true, false, false);
+            return new TasksPagedResult<>(Collections.emptyList(), 0, 0, 0,
+                    true, true, false, false);
         }
     }
 
@@ -70,7 +70,7 @@ public class TaskServiceImpl implements TaskService {
         Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
-        if (user.isPresent()) {
+        if (user.isPresent() && project.isPresent()) {
             Task task = new Task();
             task.setName(cmd.name());
             task.setDescription(cmd.description());
@@ -78,6 +78,7 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Status.IN_WORK);
             task.setUser(user.get());
             task.setProject(project.get());
+            task.setTags(String.join("$", cmd.tags()));
             return TaskDto.from(taskRepository.save(task));
         } else {
             return null;

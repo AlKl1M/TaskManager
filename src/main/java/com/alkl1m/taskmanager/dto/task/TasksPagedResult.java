@@ -2,10 +2,11 @@ package com.alkl1m.taskmanager.dto.task;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public record TasksPagedResult<T>(
-        List<T> data,
+public record TasksPagedResult<CreateBackTaskRequest>(
+        List<CreateBackTaskRequest> data,
         long totalElements,
         int pageNumber,
         int totalPages,

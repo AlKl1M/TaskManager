@@ -18,7 +18,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping("/projects/{projectId}/tasks")
-    TasksPagedResult<TaskDto> findTasks(
+    TasksPagedResult<CreateBackTaskRequest> findTasks(
             @PathVariable Long projectId,
             @RequestParam(name = "page", defaultValue = "1") Integer pageNo,
             @RequestParam(name = "size", defaultValue = "10") Integer pageSize) {
@@ -29,7 +29,7 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     ResponseEntity<TaskDto> create(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request) {
-        CreateTaskCommand cmd = new CreateTaskCommand(request.name(), request.description());
+        CreateTaskCommand cmd = new CreateTaskCommand(request.name(), request.description(), request.tags());
         TaskDto task = taskService.create(cmd, projectId);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
