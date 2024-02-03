@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("""
                 SELECT 
@@ -17,4 +19,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                 WHERE b.user = :user
             """)
     Page<ProjectDto> findProjects(@Param("user") User user, Pageable pageable);
+
+    @Query("SELECT p FROM Project p WHERE p.name LIKE %:query% OR p.description LIKE %:query%")
+    List<Project> findByQuery(@Param("query") String query);
 }

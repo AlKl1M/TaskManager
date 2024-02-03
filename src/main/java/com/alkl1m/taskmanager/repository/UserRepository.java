@@ -3,6 +3,8 @@ package com.alkl1m.taskmanager.repository;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUserRole(UserRole userRole);
     User findByEmail(String email);
     User findFirstById(Long userId);
+    @Query("SELECT COUNT(p) FROM User u JOIN u.projects p WHERE u.id = :userId")
+    int countUserProjects(@Param("userId") Long userId);
 }

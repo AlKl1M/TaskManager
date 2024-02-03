@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/client")
+@RequestMapping("/api/user")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -24,6 +25,11 @@ public class ProjectController {
             @RequestParam(name = "size", defaultValue = "10") Integer pageSize) {
         FindProjectsQuery query = new FindProjectsQuery(pageNo, pageSize);
         return projectService.findProjects(query);
+    }
+
+    @GetMapping("projects/search")
+    public List<ProjectDto> searchProjects(@RequestParam("query") String query) {
+        return projectService.search(query);
     }
 
     @PostMapping("/projects")
