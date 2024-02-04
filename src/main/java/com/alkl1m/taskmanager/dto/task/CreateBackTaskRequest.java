@@ -1,12 +1,8 @@
 package com.alkl1m.taskmanager.dto.task;
 
-import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.enums.Status;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public record CreateBackTaskRequest(
     Long id,
@@ -23,7 +19,7 @@ public record CreateBackTaskRequest(
                     taskDto.creationDate(),
                     taskDto.completionDate(),
                     taskDto.status(),
-                    taskDto.tags().split("\\$")
+                    taskDto.tags().split("&#/!&")
             );
         }
 }

@@ -4,8 +4,6 @@ import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.enums.Status;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Set;
 
 public record TaskDto(Long id,
                       String name,

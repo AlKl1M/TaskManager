@@ -16,14 +16,11 @@ import java.net.URI;
 @RequestMapping("/api/client")
 public class TaskController {
     private final TaskService taskService;
-
-    @GetMapping("/projects/{projectId}/tasks")
-    TasksPagedResult<CreateBackTaskRequest> findTasks(
+    @GetMapping("/projects/{projectId}/getAllTasks")
+    TasksPagedResult<CreateBackTaskRequest> getAllTasks(
             @PathVariable Long projectId,
-            @RequestParam(name = "page", defaultValue = "1") Integer pageNo,
-            @RequestParam(name = "size", defaultValue = "10") Integer pageSize) {
-        FindTasksQuery query = new FindTasksQuery(pageNo, pageSize);
-        return taskService.findTasks(query, projectId);
+            @RequestParam(name = "tag", defaultValue = "") FindTasksTags request) {
+        return taskService.getAllTasks(request, projectId);
     }
 
     @PostMapping("/projects/{projectId}/tasks")
@@ -37,7 +34,6 @@ public class TaskController {
                 .buildAndExpand(projectId, task.id()).toUri();
         return ResponseEntity.created(location).body(task);
     }
-
     @PutMapping("/projects/{projectId}/tasks/{id}")
     void update(@PathVariable Long projectId,
                 @PathVariable Long id,
