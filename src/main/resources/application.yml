@@ -6,9 +6,15 @@ spring:
   sql:
     init:
       mode: always
+  docker:
+    compose:
+      stop:
+        command: down
 application:
   security:
     jwt:
+      cookieName: jwt
+      refreshCookieName: jwt-refresh
       secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
       expirationMs: 3600000
       refreshExpirationMs: 86400000
