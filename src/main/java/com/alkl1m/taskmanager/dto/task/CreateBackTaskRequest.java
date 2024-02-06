@@ -3,6 +3,7 @@ package com.alkl1m.taskmanager.dto.task;
 import com.alkl1m.taskmanager.enums.Status;
 
 import java.time.Instant;
+import java.util.List;
 
 public record CreateBackTaskRequest(
     Long id,
@@ -11,7 +12,7 @@ public record CreateBackTaskRequest(
     Instant creationDate,
     Instant completionDate,
     Status status,
-    String[] tags) {
+    List<String> tags) {
         public static CreateBackTaskRequest from(TaskDto taskDto) {
             return new CreateBackTaskRequest(taskDto.id(),
                     taskDto.name(),
@@ -19,7 +20,7 @@ public record CreateBackTaskRequest(
                     taskDto.creationDate(),
                     taskDto.completionDate(),
                     taskDto.status(),
-                    taskDto.tags().split("&#/!&")
+                    List.of(taskDto.tags().split("&#/!&"))
             );
         }
 }

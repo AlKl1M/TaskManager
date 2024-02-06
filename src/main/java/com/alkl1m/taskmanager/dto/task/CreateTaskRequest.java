@@ -3,6 +3,7 @@ package com.alkl1m.taskmanager.dto.task;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public record CreateTaskRequest(
         @NotEmpty(message = "Name is required")
@@ -10,5 +11,5 @@ public record CreateTaskRequest(
         @NotEmpty(message = "Description is required")
         String description,
 
-        ArrayList<String> tags
+        List<String> tags
         ) {}

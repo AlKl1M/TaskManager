@@ -30,39 +30,18 @@ public class TaskServiceImpl implements TaskService {
     private final JwtUtil jwtUtil;
 
     @Override
-    public TasksPagedResult<CreateBackTaskRequest> getAllTasks(FindTasksTags tag, Long projectId){
+    public List<CreateBackTaskRequest> getAllTasks(FindTasksTags tag, Long projectId){
         Long userId = getUserIdFromToken();
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
         if (user.isPresent() && project.isPresent()) {
-            ArrayList<TaskDto> page = taskRepository.getAllTasks(user.get(), project.get());
-            ArrayList<CreateBackTaskRequest> newData = new ArrayList<>(page.size());
-            for(TaskDto req: page){
-                newData.add(CreateBackTaskRequest.from(req));
-            }
-            ArrayList<CreateBackTaskRequest> sortNewData = getCreateBackTaskRequests(tag, newData, page);
-            return new TasksPagedResult<>(sortNewData);
+            return getCreateBackTaskRequests(tag,
+                    taskRepository.getAllTasks(user.get(), project.get()));
         } else {
-            return new TasksPagedResult<>(Collections.emptyList());
+            return Collections.emptyList();
         }
     }
 
-    private static ArrayList<CreateBackTaskRequest> getCreateBackTaskRequests(FindTasksTags tag, ArrayList<CreateBackTaskRequest> newData, ArrayList<TaskDto> page) {
-        ArrayList<CreateBackTaskRequest> sortNewData = new ArrayList<>(newData.size());
-        if (Objects.equals(tag.tag(), "")){
-            for(int i = 0; i < page.size(); i++){
-                sortNewData.add(newData.get(i));
-            }
-        }
-        else {
-            for (CreateBackTaskRequest request: newData){
-                if (Arrays.asList(request.tags()).contains(tag.tag())) {
-                    sortNewData.add(request);
-                }
-            }
-        }
-        return sortNewData;
-    }
 
     @Override
     @Transactional
@@ -88,11 +67,6 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalStateException("ERROR: Tag size should be > 2 and < 20, maxTags = 3");
         }
     }
-    private boolean IsValidTags(ArrayList<String> tags) {
-        if (tags.size() > 3) return false;
-        for (String tag: tags) if (tag.length() > 20 || tag.length() < 2 || tag.contains("&#/!&")) return false;
-        return true;
-    }
 
     @Override
     @Transactional
@@ -102,6 +76,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
         task.setName(cmd.name());
         task.setDescription(cmd.description());
+        task.setTags(String.join("&#/!&", cmd.tags()));
         if (task.getUser().getId().equals(userId)) {
             return TaskDto.from(taskRepository.save(task));
         } else {
@@ -139,5 +114,27 @@ public class TaskServiceImpl implements TaskService {
     private Long getUserIdFromToken() {
         String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
         return jwtUtil.extractId(token);
+    }
+
+    private static List<CreateBackTaskRequest> getCreateBackTaskRequests(FindTasksTags tag, List<TaskDto> page) {
+        List<CreateBackTaskRequest> sortNewData = new ArrayList<>(page.size());
+        if (Objects.equals(tag.tag(), "")) {
+            for (TaskDto request : page)
+                sortNewData.add(CreateBackTaskRequest.from(request));
+        }
+        else {
+            for (TaskDto request: page)
+                if (Arrays.asList(request.tags().split("&#/!&")).contains(tag.tag()))
+                    sortNewData.add(CreateBackTaskRequest.from(request));
+        }
+        return sortNewData;
+    }
+
+    private boolean IsValidTags(List<String> tags) {
+        if (tags.size() > 3) return false;
+        for (String tag: tags)
+            if (tag.length() > 20 || tag.length() < 2 || tag.contains("&#/!&"))
+                return false;
+        return true;
     }
 }

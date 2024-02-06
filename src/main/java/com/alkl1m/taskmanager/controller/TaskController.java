@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ import java.net.URI;
 public class TaskController {
     private final TaskService taskService;
     @GetMapping("/projects/{projectId}/getAllTasks")
-    TasksPagedResult<CreateBackTaskRequest> getAllTasks(
+    List<CreateBackTaskRequest> getAllTasks(
             @PathVariable Long projectId,
             @RequestParam(name = "tag", defaultValue = "") FindTasksTags request) {
         return taskService.getAllTasks(request, projectId);
@@ -35,11 +36,11 @@ public class TaskController {
         return ResponseEntity.created(location).body(task);
     }
     @PutMapping("/projects/{projectId}/tasks/{id}")
-    void update(@PathVariable Long projectId,
+    TaskDto update(@PathVariable Long projectId,
                 @PathVariable Long id,
-                @RequestBody @Validated UpdateProjectRequest request) {
-        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description());
-        taskService.update(cmd, projectId);
+                @RequestBody @Validated UpdateTaskRequest request) {
+        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.tags());
+        return taskService.update(cmd, projectId);
     }
 
     @DeleteMapping("/projects/{projectId}/tasks/{id}")
