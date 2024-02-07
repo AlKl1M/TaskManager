@@ -1,5 +1,10 @@
 package com.alkl1m.taskmanager.dto.task;
 
-public record CreateTaskCommand(String name,
-                                String description) {
+import java.util.List;
+
+public record CreateTaskCommand(Long id,
+                                String name,
+                                String description,
+                                List<String> tags
+) {
 }

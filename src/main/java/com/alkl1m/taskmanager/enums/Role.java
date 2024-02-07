@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.enums;
 
-public enum UserRole {
+public enum Role {
     ADMIN,
-    CLIENT
+    USER
 }

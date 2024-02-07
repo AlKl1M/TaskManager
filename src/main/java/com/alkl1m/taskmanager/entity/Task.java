@@ -8,6 +8,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,6 +29,8 @@ public class Task {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
+    @Column(nullable = true)
+    private String tags;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
     @JoinColumn(name="project_id", nullable = false)

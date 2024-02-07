@@ -1,58 +1,52 @@
 package com.alkl1m.taskmanager.entity;
 
-import com.alkl1m.taskmanager.enums.UserRole;
+import com.alkl1m.taskmanager.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.NoArgsConstructor;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
-@Table(name = "users")
-public class User implements UserDetails {
+@NoArgsConstructor
+@Table(name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name"),
+        @UniqueConstraint(columnNames = "email")
+    })
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
+    @Size(max = 20)
     private String name;
+
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(max = 120)
     private String password;
-    private UserRole userRole;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(userRole.name()));
-    }
+    private Role role;
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Project> projects = new ArrayList<>();
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
+    public User(String name, String email, String password, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
     }
 }
