@@ -5,7 +5,7 @@ import com.alkl1m.taskmanager.dto.task.*;
 import java.util.List;
 
 public interface TaskService {
-    List<CreateBackTaskRequest> getAllTasks(FindTasksTags findTags, Long projectId);
+    List<CreateBackTaskRequest> getAllTasks(Long userId, FindTasksTags findTags, Long projectId);
 
     TaskDto create(CreateTaskCommand cmd, Long projectId);
     TaskDto update(UpdateTaskCommand cmd, Long projectId);

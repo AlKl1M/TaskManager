@@ -7,12 +7,9 @@ import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.exception.TaskNotFoundException;
-import com.alkl1m.taskmanager.exception.UnauthorizedAccessException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.TaskRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
-import com.alkl1m.taskmanager.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +23,9 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
-    private final HttpServletRequest httpServletRequest;
-    private final JwtUtil jwtUtil;
 
     @Override
-    public List<CreateBackTaskRequest> getAllTasks(FindTasksTags tag, Long projectId){
-        Long userId = getUserIdFromToken();
+    public List<CreateBackTaskRequest> getAllTasks(Long userId, FindTasksTags tag, Long projectId){
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
         if (user.isPresent() && project.isPresent()) {
@@ -47,8 +41,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskDto create(CreateTaskCommand cmd, Long projectId) {
         if (IsValidTags(cmd.tags())) {
-            Long userId = getUserIdFromToken();
-            Optional<User> user = userRepository.findById(userId);
+            Optional<User> user = userRepository.findById(cmd.id());
             Optional<Project> project = projectRepository.findById(projectId);
             if (user.isPresent() && project.isPresent()) {
                 Task task = new Task();
@@ -71,50 +64,31 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskDto update(UpdateTaskCommand cmd, Long projectId) {
-        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(cmd.id())
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
         task.setName(cmd.name());
         task.setDescription(cmd.description());
         task.setTags(String.join("&#/!&", cmd.tags()));
-        if (task.getUser().getId().equals(userId)) {
-            return TaskDto.from(taskRepository.save(task));
-        } else {
-            throw new UnauthorizedAccessException();
-        }
+        return TaskDto.from(taskRepository.save(task));
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> TaskNotFoundException.of(id));
-        if (task.getUser().getId().equals(userId)) {
-            taskRepository.delete(task);
-        } else {
-            throw new UnauthorizedAccessException();
-        }
+        taskRepository.delete(task);
     }
 
     @Override
     @Transactional
     public void changeStatus(Long id) {
-        Long userId = getUserIdFromToken();
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
-        if (task.getUser().getId().equals(userId)) {
-            task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
-            taskRepository.save(task);
-        } else {
-            throw new UnauthorizedAccessException();
-        }
+        task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+        taskRepository.save(task);
     }
 
-    private Long getUserIdFromToken() {
-        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
-        return jwtUtil.extractId(token);
-    }
 
     private static List<CreateBackTaskRequest> getCreateBackTaskRequests(FindTasksTags tag, List<TaskDto> page) {
         List<CreateBackTaskRequest> sortNewData = new ArrayList<>(page.size());

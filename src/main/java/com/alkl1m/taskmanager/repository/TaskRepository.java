@@ -4,6 +4,7 @@ import com.alkl1m.taskmanager.dto.task.TaskDto;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
+import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                 WHERE b.user = :user and  b.project = :project
             """)
     ArrayList<TaskDto> getAllTasks(@Param("user") User user, @Param("project") Project project);
+
+    Task getTaskById(Long id);
 }
