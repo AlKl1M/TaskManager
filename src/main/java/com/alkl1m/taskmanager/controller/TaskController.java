@@ -32,11 +32,12 @@ public class TaskController {
     ResponseEntity<TaskDto> create(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CreateTaskCommand cmd = new CreateTaskCommand(
-                userDetails.getId(),
-                request.name(),
-                request.description(),
-                request.tags());
+        CreateTaskCommand cmd = CreateTaskCommand.builder()
+                .id(userDetails.getId())
+                .name(request.name())
+                .description(request.description())
+                .tags(request.tags())
+                .build();
         TaskDto task = taskService.create(cmd, projectId);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController
@@ -29,11 +28,11 @@ public class ProjectController {
     @PostMapping("/projects")
     ResponseEntity<ProjectDto> create(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                       @RequestBody @Validated CreateProjectRequest request) {
-        CreateProjectCommand cmd = new CreateProjectCommand(
-                userDetails.getId(),
-                request.name(),
-                request.description()
-        );
+        CreateProjectCommand cmd = CreateProjectCommand.builder()
+                .id(userDetails.getId())
+                .name(request.name())
+                .description(request.description())
+                .build();
         ProjectDto project = projectService.create(cmd);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

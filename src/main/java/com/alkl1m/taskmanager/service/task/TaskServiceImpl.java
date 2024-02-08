@@ -44,14 +44,14 @@ public class TaskServiceImpl implements TaskService {
             Optional<User> user = userRepository.findById(cmd.id());
             Optional<Project> project = projectRepository.findById(projectId);
             if (user.isPresent() && project.isPresent()) {
-                Task task = new Task();
-                task.setName(cmd.name());
-                task.setDescription(cmd.description());
-                task.setCreatedAt(Instant.now());
-                task.setStatus(Status.IN_WORK);
-                task.setUser(user.get());
-                task.setProject(project.get());
-                task.setTags(String.join("&#/!&", cmd.tags()));
+                Task task = Task.builder()
+                        .name(cmd.name())
+                        .description(cmd.description())
+                        .createdAt(Instant.now())
+                        .status(Status.IN_WORK)
+                        .user(user.get())
+                        .project(project.get())
+                        .tags(String.join("&#/!&", cmd.tags())).build();
                 return TaskDto.from(taskRepository.save(task));
             } else {
                 return null;

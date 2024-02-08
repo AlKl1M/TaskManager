@@ -3,14 +3,20 @@ package com.alkl1m.taskmanager.entity;
 import com.alkl1m.taskmanager.enums.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 
 @Entity
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name="projects")
 public class Project {
     @Id
