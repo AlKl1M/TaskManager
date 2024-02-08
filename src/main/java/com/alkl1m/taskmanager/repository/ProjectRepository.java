@@ -13,6 +13,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByQueryAndUserId(@Param("query") String query, @Param("userId") Long userId);
     List<Project> findAllByUserId(Long userId);
     List<Project> getAllProjectsByUserId(Long id);
-    Optional<Project> getProjectById(Long id);
+    Project getProjectById(Long id);
 
 }
