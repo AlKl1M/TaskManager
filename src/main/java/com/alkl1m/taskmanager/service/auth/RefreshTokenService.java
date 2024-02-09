@@ -50,4 +50,11 @@ public class RefreshTokenService {
         return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
     }
 
+    public Long getRefreshTokenDurationMs() {
+        return refreshTokenDurationMs;
+    }
+
+    public void setRefreshTokenDurationMs(Long refreshTokenDurationMs) {
+        this.refreshTokenDurationMs = refreshTokenDurationMs;
+    }
 }

@@ -8,6 +8,7 @@ import java.time.Instant;
 @Entity(name = "refresh_token")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RefreshToken {

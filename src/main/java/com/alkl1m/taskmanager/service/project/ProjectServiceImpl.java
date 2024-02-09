@@ -61,7 +61,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public ProjectDto update(UpdateProjectCommand cmd) {
         Project project = projectRepository.findById(cmd.id())
-                .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
+                .orElseThrow(() -> ProjectNotFoundException.of(cmd.id()));
         project.setName(cmd.name());
         project.setDescription(cmd.description());
         return ProjectDto.from(projectRepository.save(project));
