@@ -48,6 +48,7 @@ public class TaskServiceImpl implements TaskService {
                         .name(cmd.name())
                         .description(cmd.description())
                         .createdAt(Instant.now())
+                        .deadline(cmd.deadline())
                         .status(Status.IN_WORK)
                         .user(user.get())
                         .project(project.get())
@@ -68,6 +69,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
         task.setName(cmd.name());
         task.setDescription(cmd.description());
+        task.setDeadline(cmd.deadline());
         task.setTags(String.join("&#/!&", cmd.tags()));
         return TaskDto.from(taskRepository.save(task));
     }

@@ -11,6 +11,7 @@ public record CreateBackTaskRequest(
     String description,
     Instant creationDate,
     Instant completionDate,
+    Instant deadline,
     Status status,
     List<String> tags) {
         public static CreateBackTaskRequest from(TaskDto taskDto) {
@@ -19,6 +20,7 @@ public record CreateBackTaskRequest(
                     taskDto.description(),
                     taskDto.creationDate(),
                     taskDto.completionDate(),
+                    taskDto.deadline(),
                     taskDto.status(),
                     List.of(taskDto.tags().split("&#/!&"))
             );

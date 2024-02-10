@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
                 SELECT 
-                new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.status, b.tags)
+                new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.deadline, b.status, b.tags)
                 FROM Task b
                 WHERE b.user = :user and  b.project = :project
             """)

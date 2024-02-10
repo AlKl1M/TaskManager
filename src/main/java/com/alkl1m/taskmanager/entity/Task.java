@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public class Task {
     private Instant createdAt;
     @Column(name="done_at")
     private Instant doneAt;
+    @Column(name="deadline")
+    private Instant deadline;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;

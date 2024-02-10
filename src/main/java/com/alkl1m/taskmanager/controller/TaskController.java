@@ -37,6 +37,7 @@ public class TaskController {
                 .name(request.name())
                 .description(request.description())
                 .tags(request.tags())
+                .deadline(request.deadline())
                 .build();
         TaskDto task = taskService.create(cmd, projectId);
         URI location = ServletUriComponentsBuilder
@@ -50,7 +51,7 @@ public class TaskController {
     TaskDto update(@PathVariable Long projectId,
                 @PathVariable Long id,
                 @RequestBody @Validated UpdateTaskRequest request) {
-        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.tags());
+        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.deadline(), request.tags());
         return taskService.update(cmd, projectId);
     }
 
