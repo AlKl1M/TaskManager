@@ -85,7 +85,13 @@ public class TaskServiceImpl implements TaskService {
     public void changeStatus(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
-        task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+        if (task.getStatus().equals(Status.IN_WORK)) {
+            task.setStatus(Status.DONE);
+            task.setDoneAt(Instant.now());
+        } else {
+            task.setStatus(Status.IN_WORK);
+            task.setDoneAt(null);
+        }
         taskRepository.save(task);
     }
 

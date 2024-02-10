@@ -80,7 +80,13 @@ public class ProjectServiceImpl implements ProjectService {
     public void changeStatus(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
-        project.setStatus(project.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+        if (project.getStatus().equals(Status.IN_WORK)) {
+            project.setStatus(Status.DONE);
+            project.setDoneAt(Instant.now());
+        } else {
+            project.setStatus(Status.IN_WORK);
+            project.setDoneAt(null);
+        }
         projectRepository.save(project);
     }
 
