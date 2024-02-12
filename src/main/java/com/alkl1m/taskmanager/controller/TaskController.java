@@ -1,6 +1,5 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.project.UpdateProjectRequest;
 import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
@@ -17,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/client")
+@RequestMapping("/api/user")
 public class TaskController {
     private final TaskService taskService;
     @GetMapping("/projects/{projectId}/getAllTasks")

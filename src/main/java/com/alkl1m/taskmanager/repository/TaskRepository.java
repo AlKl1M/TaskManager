@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
@@ -19,6 +20,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                 WHERE b.user = :user and  b.project = :project
             """)
     ArrayList<TaskDto> getAllTasks(@Param("user") User user, @Param("project") Project project);
-
     Task getTaskById(Long id);
+    List<Task> findTop50ByUserIdOrderByDeadlineAsc(Long userId);
 }
