@@ -22,7 +22,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = "name"),
         @UniqueConstraint(columnNames = "email")
     })
-public class User{
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +41,7 @@ public class User{
     private String password;
 
     private Role role;
+    private Boolean enabled = false;
 
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
