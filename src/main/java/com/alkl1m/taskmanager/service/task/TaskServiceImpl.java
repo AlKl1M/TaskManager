@@ -44,14 +44,15 @@ public class TaskServiceImpl implements TaskService {
             Optional<User> user = userRepository.findById(cmd.id());
             Optional<Project> project = projectRepository.findById(projectId);
             if (user.isPresent() && project.isPresent()) {
-                Task task = new Task();
-                task.setName(cmd.name());
-                task.setDescription(cmd.description());
-                task.setCreatedAt(Instant.now());
-                task.setStatus(Status.IN_WORK);
-                task.setUser(user.get());
-                task.setProject(project.get());
-                task.setTags(String.join("&#/!&", cmd.tags()));
+                Task task = Task.builder()
+                        .name(cmd.name())
+                        .description(cmd.description())
+                        .createdAt(Instant.now())
+                        .deadline(cmd.deadline())
+                        .status(Status.IN_WORK)
+                        .user(user.get())
+                        .project(project.get())
+                        .tags(String.join("&#/!&", cmd.tags())).build();
                 return TaskDto.from(taskRepository.save(task));
             } else {
                 return null;
@@ -68,6 +69,7 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
         task.setName(cmd.name());
         task.setDescription(cmd.description());
+        task.setDeadline(cmd.deadline());
         task.setTags(String.join("&#/!&", cmd.tags()));
         return TaskDto.from(taskRepository.save(task));
     }
@@ -85,7 +87,13 @@ public class TaskServiceImpl implements TaskService {
     public void changeStatus(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
-        task.setStatus(task.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+        if (task.getStatus().equals(Status.IN_WORK)) {
+            task.setStatus(Status.DONE);
+            task.setDoneAt(Instant.now());
+        } else {
+            task.setStatus(Status.IN_WORK);
+            task.setDoneAt(null);
+        }
         taskRepository.save(task);
     }
 

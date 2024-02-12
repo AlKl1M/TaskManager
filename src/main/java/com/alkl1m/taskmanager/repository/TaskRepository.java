@@ -10,15 +10,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
                 SELECT 
-                new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.status, b.tags)
+                new com.alkl1m.taskmanager.dto.task.TaskDto(b.id, b.name, b.description, b.createdAt, b.doneAt, b.deadline, b.status, b.tags)
                 FROM Task b
                 WHERE b.user = :user and  b.project = :project
             """)
     ArrayList<TaskDto> getAllTasks(@Param("user") User user, @Param("project") Project project);
-
     Task getTaskById(Long id);
+    List<Task> findTop50ByUserIdOrderByDeadlineAsc(Long userId);
 }

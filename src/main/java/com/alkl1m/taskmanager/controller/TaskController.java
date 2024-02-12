@@ -1,6 +1,5 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.project.UpdateProjectRequest;
 import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
@@ -17,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/client")
+@RequestMapping("/api/user")
 public class TaskController {
     private final TaskService taskService;
     @GetMapping("/projects/{projectId}/getAllTasks")
@@ -32,11 +31,13 @@ public class TaskController {
     ResponseEntity<TaskDto> create(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CreateTaskCommand cmd = new CreateTaskCommand(
-                userDetails.getId(),
-                request.name(),
-                request.description(),
-                request.tags());
+        CreateTaskCommand cmd = CreateTaskCommand.builder()
+                .id(userDetails.getId())
+                .name(request.name())
+                .description(request.description())
+                .tags(request.tags())
+                .deadline(request.deadline())
+                .build();
         TaskDto task = taskService.create(cmd, projectId);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -49,7 +50,7 @@ public class TaskController {
     TaskDto update(@PathVariable Long projectId,
                 @PathVariable Long id,
                 @RequestBody @Validated UpdateTaskRequest request) {
-        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.tags());
+        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.deadline(), request.tags());
         return taskService.update(cmd, projectId);
     }
 

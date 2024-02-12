@@ -7,6 +7,7 @@ import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
+import com.alkl1m.taskmanager.exception.TaskNotFoundException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -43,12 +44,13 @@ public class ProjectServiceImpl implements ProjectService {
             if (projectCount >= 20) {
                 throw new IllegalStateException("User has reached the maximum number of projects.");
             }
-            Project project = new Project();
-            project.setName(cmd.name());
-            project.setDescription(cmd.description());
-            project.setCreatedAt(Instant.now());
-            project.setStatus(Status.IN_WORK);
-            project.setUser(user.get());
+            Project project = Project.builder()
+                    .name(cmd.name())
+                    .description(cmd.description())
+                    .createdAt(Instant.now())
+                    .status(Status.IN_WORK)
+                    .user(user.get())
+                    .build();
             return ProjectDto.from(projectRepository.save(project));
         } else {
             return null;
@@ -78,7 +80,13 @@ public class ProjectServiceImpl implements ProjectService {
     public void changeStatus(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> ProjectNotFoundException.of(id));
-        project.setStatus(project.getStatus().equals(Status.IN_WORK) ? Status.DONE : Status.IN_WORK);
+        if (project.getStatus().equals(Status.IN_WORK)) {
+            project.setStatus(Status.DONE);
+            project.setDoneAt(Instant.now());
+        } else {
+            project.setStatus(Status.IN_WORK);
+            project.setDoneAt(null);
+        }
         projectRepository.save(project);
     }
 
