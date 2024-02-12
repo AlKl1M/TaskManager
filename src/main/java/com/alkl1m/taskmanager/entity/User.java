@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = "name"),
         @UniqueConstraint(columnNames = "email")
     })
-public class User{
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,6 +37,7 @@ public class User{
     private String password;
 
     private Role role;
+    private Boolean enabled = false;
 
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
