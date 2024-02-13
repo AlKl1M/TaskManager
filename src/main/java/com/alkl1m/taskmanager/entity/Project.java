@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Builder
@@ -33,6 +34,9 @@ public class Project {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
     @JoinColumn(name="user_id", nullable = false)
