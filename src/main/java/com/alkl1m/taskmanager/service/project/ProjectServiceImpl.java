@@ -7,7 +7,6 @@ import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
-import com.alkl1m.taskmanager.exception.TaskNotFoundException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import lombok.AllArgsConstructor;

@@ -1,10 +1,8 @@
 package com.alkl1m.taskmanager.service.auth;
 
-import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.RefreshToken;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Role;
-import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.TokenRefreshException;
 import com.alkl1m.taskmanager.repository.RefreshTokenRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
@@ -12,7 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
