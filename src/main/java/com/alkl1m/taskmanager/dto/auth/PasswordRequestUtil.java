@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.entity;
+package com.alkl1m.taskmanager.dto.auth;
 
 public record PasswordRequestUtil(
         String email,

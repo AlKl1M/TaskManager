@@ -1,6 +1,5 @@
 package com.alkl1m.taskmanager.service.PasswordResetToken;
 
-import com.alkl1m.taskmanager.entity.PasswordResetRequest;
 import com.alkl1m.taskmanager.entity.PasswordResetToken;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.repository.PasswordResetTokenRepository;

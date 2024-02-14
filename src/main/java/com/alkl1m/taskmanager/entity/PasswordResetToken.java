@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -40,6 +39,7 @@ public class PasswordResetToken {
         this.token = token;
         this.expiryDate = this.getExpiryDate();
     }
+
     public Date getExpiryDate(){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(new Date().getTime());

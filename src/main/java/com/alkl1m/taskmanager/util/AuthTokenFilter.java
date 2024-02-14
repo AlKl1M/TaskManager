@@ -1,7 +1,6 @@
-package com.alkl1m.taskmanager.configuration;
+package com.alkl1m.taskmanager.util;
 
 import com.alkl1m.taskmanager.service.auth.UserDetailsServiceImpl;
-import com.alkl1m.taskmanager.util.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

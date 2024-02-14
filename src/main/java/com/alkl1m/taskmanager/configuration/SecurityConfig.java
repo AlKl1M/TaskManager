@@ -1,6 +1,8 @@
 package com.alkl1m.taskmanager.configuration;
 
 import com.alkl1m.taskmanager.service.auth.UserDetailsServiceImpl;
+import com.alkl1m.taskmanager.util.AuthEntryPointJwt;
+import com.alkl1m.taskmanager.util.AuthTokenFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

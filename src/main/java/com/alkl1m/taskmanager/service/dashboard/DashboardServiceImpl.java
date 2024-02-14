@@ -20,7 +20,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final TaskRepository taskRepository;
     @Override
     public DashboardDto getDashboardData(Long userId) {
-        List<Project> projects = projectRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId);
+        List<Project> projects = projectRepository.findByUserIdOrderByCreatedAtDesc(userId);
         List<Task> tasks = taskRepository.findTop50ByUserIdOrderByDeadlineAsc(userId);
 
         List<DashboardProjectDto> dashboardProjects = new ArrayList<>();
