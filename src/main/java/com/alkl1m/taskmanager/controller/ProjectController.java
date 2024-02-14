@@ -3,6 +3,7 @@ package com.alkl1m.taskmanager.controller;
 import com.alkl1m.taskmanager.dto.project.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.project.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

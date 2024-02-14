@@ -3,9 +3,7 @@ package com.alkl1m.taskmanager.controller;
 import com.alkl1m.taskmanager.dto.auth.PasswordRequestUtil;
 import com.alkl1m.taskmanager.dto.auth.PasswordResetRequest;
 import com.alkl1m.taskmanager.entity.User;
-import com.alkl1m.taskmanager.entity.VerificationToken;
 import com.alkl1m.taskmanager.event.listener.RegistrationCompleteEventListener;
-import com.alkl1m.taskmanager.repository.VerificationTokenRepository;
 import com.alkl1m.taskmanager.service.user.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,8 +29,9 @@ public class EmailController {
         String verificationResult = userService.validateToken(token);
         if (verificationResult.equalsIgnoreCase("valid")){
             log.info("User verified account by email successfully");
+        } else {
+            log.warn("User trying to use invalid verification link to verify account");
         }
-        log.warn("User trying to use invalid verification link to verify account");
     }
 
     @PostMapping("/password-reset-request")
