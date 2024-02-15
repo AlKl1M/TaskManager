@@ -27,12 +27,12 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
 
     @Override
-    public List<CreateBackTaskRequest> getAllTasks(Long userId, FindTasksTags tag, Long projectId){
+    public List<CreateBackTaskDto> getAllTasks(Long userId, FindTasksTags tag, Long projectId){
         log.info("Getting all tasks for user with ID: {}", userId);
         Optional<User> user = userRepository.findById(userId);
         Optional<Project> project = projectRepository.findById(projectId);
         if (user.isPresent() && project.isPresent()) {
-            return getCreateBackTaskRequests(tag,
+            return getCreateBackTaskDto(tag,
                     taskRepository.getAllTasks(user.get(), project.get()));
         } else {
             return Collections.emptyList();
@@ -111,16 +111,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
 
-    private static List<CreateBackTaskRequest> getCreateBackTaskRequests(FindTasksTags tag, List<TaskDto> page) {
-        List<CreateBackTaskRequest> sortNewData = new ArrayList<>(page.size());
+    private static List<CreateBackTaskDto> getCreateBackTaskDto(FindTasksTags tag, List<TaskDto> page) {
+        List<CreateBackTaskDto> sortNewData = new ArrayList<>(page.size());
         if (Objects.equals(tag.tag(), "")) {
             for (TaskDto request : page)
-                sortNewData.add(CreateBackTaskRequest.from(request));
+                sortNewData.add(CreateBackTaskDto.from(request));
         }
         else {
             for (TaskDto request: page)
                 if (Arrays.asList(request.tags().split("&#/!&")).contains(tag.tag()))
-                    sortNewData.add(CreateBackTaskRequest.from(request));
+                    sortNewData.add(CreateBackTaskDto.from(request));
         }
         return sortNewData;
     }

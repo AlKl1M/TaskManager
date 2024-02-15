@@ -5,7 +5,7 @@ import com.alkl1m.taskmanager.enums.Status;
 import java.time.Instant;
 import java.util.List;
 
-public record CreateBackTaskRequest(
+public record CreateBackTaskDto(
     Long id,
     String name,
     String description,
@@ -14,8 +14,8 @@ public record CreateBackTaskRequest(
     Instant deadline,
     Status status,
     List<String> tags) {
-        public static CreateBackTaskRequest from(TaskDto taskDto) {
-            return new CreateBackTaskRequest(taskDto.id(),
+        public static CreateBackTaskDto from(TaskDto taskDto) {
+            return new CreateBackTaskDto(taskDto.id(),
                     taskDto.name(),
                     taskDto.description(),
                     taskDto.creationDate(),

@@ -5,15 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-<<<<<<<<< Temporary merge branch 1
-import lombok.*;
-import org.springframework.security.core.userdetails.UserDetails;
-=========
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
->>>>>>>>> Temporary merge branch 2
 
 import java.util.ArrayList;
 import java.util.List;
