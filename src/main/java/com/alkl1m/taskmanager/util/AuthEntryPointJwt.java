@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.configuration;
+package com.alkl1m.taskmanager.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

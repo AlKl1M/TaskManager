@@ -1,5 +1,6 @@
-package com.alkl1m.taskmanager.configuration;
+package com.alkl1m.taskmanager.util;
 
+import com.alkl1m.taskmanager.dto.auth.ErrorMessage;
 import com.alkl1m.taskmanager.exception.TokenRefreshException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

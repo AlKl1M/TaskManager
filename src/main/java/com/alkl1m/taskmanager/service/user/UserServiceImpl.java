@@ -6,6 +6,7 @@ import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.repository.VerificationTokenRepository;
 import com.alkl1m.taskmanager.service.PasswordResetToken.PasswordResetTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
