@@ -9,7 +9,6 @@ import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

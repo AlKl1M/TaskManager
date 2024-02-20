@@ -41,7 +41,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
                 "Please, follow the link below to complete your registration.</p>"+
                 "<a href=\"" +url+ "\">Verify your email to activate your account</a>"+
                 "<p> Thank you <br> Task Manager Service";
-        sendEmail(url, subject, mailContent);
+        sendEmail(subject, mailContent);
     }
 
     public void sendPasswordResetVerificationEmail(String url) throws MessagingException, UnsupportedEncodingException {
@@ -51,10 +51,10 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
                 "Please, follow the link below to complete the action.</p>"+
                 "<a href=\"" +url+ "\">Reset password</a>"+
                 "<p> Task Manager Service";
-        sendEmail(url, subject, mailContent);
+        sendEmail(subject, mailContent);
     }
 
-    public void sendEmail(String url, String subject, String mailContent) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(String subject, String mailContent) throws MessagingException, UnsupportedEncodingException {
         String senderName = "Task Manager Service";
         MimeMessage message = mailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);
