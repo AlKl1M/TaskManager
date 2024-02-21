@@ -7,30 +7,39 @@ import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ProjectControllerIT {
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
+
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -45,8 +54,8 @@ class ProjectControllerIT {
     @BeforeEach
     void setUp() {
         user = User.builder()
-                .name("test")
-                .email("test@mail.com")
+                .name(UUID.randomUUID().toString().substring(0, 8))
+                .email(UUID.randomUUID().toString().substring(0, 8))
                 .password(encoder.encode("123"))
                 .role(Role.USER)
                 .enabled(true)
@@ -66,12 +75,20 @@ class ProjectControllerIT {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    @AfterEach
+    void tearDown() {
+        projectRepository.deleteAll();
+        userRepository.delete(user);
+        SecurityContextHolder.clearContext();
+    }
+
+
     @Test
     void testGetAllProjectsWhenQueryIsNull() throws Exception {
         mockMvc.perform(get("/api/user/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].id").value(2))
                 .andExpect(jsonPath("$[0].name").value("test1 project"));
     }
 
@@ -80,7 +97,7 @@ class ProjectControllerIT {
         mockMvc.perform(get("/api/user/projects?query=t"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].id").value(4))
                 .andExpect(jsonPath("$[0].name").value("test1 project"));
     }
 
