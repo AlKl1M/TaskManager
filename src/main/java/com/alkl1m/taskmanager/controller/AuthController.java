@@ -37,7 +37,6 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final ApplicationEventPublisher publisher;
 
-
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Authenticating user: {}", loginRequest.email());
@@ -85,7 +84,7 @@ public class AuthController {
     }
 
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody HttpServletRequest request) {
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         log.info("Refreshing token...");
         String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
         log.debug("Refresh token: {}", refreshToken);
@@ -108,16 +107,20 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
         log.info("Logging out user");
-        Object principle = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = ((UserDetailsImpl) principle).getId();
-        refreshTokenService.deleteByUserId(userId);
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) principal;
+                Long userId = userDetails.getId();
+                refreshTokenService.deleteByUserId(userId);
+            }
+        }
         ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
         ResponseCookie jwtRefreshCookie = jwtUtils.getCleanJwtRefreshToken();
         log.info("Cleaned JWT cookies. User signed out");
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())

@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +74,7 @@ class ProjectServiceTest {
 
 
     @Test
-    public void testProjectService_WithValidProject_ShouldReturnAllProjects() {
+    public void shouldReturnAllProjects_WithValidProject() {
         List<Project> projects = Arrays.asList(project1, project2);
         when(projectRepository.findAllByUserId(user.getId())).thenReturn(projects);
 
@@ -84,6 +85,19 @@ class ProjectServiceTest {
         assertEquals(project1.getName(), result.get(0).name());
         assertEquals(project2.getId(), result.get(1).id());
         assertEquals(project2.getName(), result.get(1).name());
+    }
+
+    @Test
+    public void shouldReturnProjectDtoList_WithQuery() {
+        String query = "test";
+        List<Project> projects = Arrays.asList(project1, project2);
+        when(projectRepository.findByQueryAndUserId(query, user.getId())).thenReturn(projects);
+        List<ProjectDto> expected = projects.stream()
+                .map(ProjectDto::from)
+                .collect(Collectors.toList());
+        List<ProjectDto> result = projectService.getAllProjectsByQuery(user.getId(), query);
+        verify(projectRepository).findByQueryAndUserId(query, user.getId());
+        assertEquals(expected, result);
     }
 
     @Test
