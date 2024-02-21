@@ -2,9 +2,11 @@ package com.alkl1m.taskmanager.dto.task;
 
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.enums.Status;
+import lombok.Builder;
 
 import java.time.Instant;
 
+@Builder
 public record TaskDto(Long id,
                       String name,
                       String description,

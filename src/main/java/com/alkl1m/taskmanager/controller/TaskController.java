@@ -21,12 +21,19 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class TaskController {
     private final TaskService taskService;
-    @GetMapping("/projects/{projectId}/getAllTasks")
-    List<CreateBackTaskDto> getAllTasks(
+    @GetMapping("/projects/{projectId}/getAllTasksBySearchWord")
+    List<CreateBackTaskDto> getAllTasksBySearchWord(
             @PathVariable Long projectId,
-            @RequestParam(name = "tag", defaultValue = "") FindTasksTags request,
+            @RequestParam(required = false) String searchWord,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return taskService.getAllTasks(userDetails.getId(), request, projectId);
+        return taskService.getAllTasksBySearchWord(userDetails.getId(), projectId, searchWord);
+    }
+    @GetMapping("/projects/{projectId}/getAllTasksByTag")
+    List<CreateBackTaskDto> getAllTasksByTag(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String tag,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return taskService.getAllTasksByTag(userDetails.getId(), projectId, tag);
     }
 
     @PostMapping("/projects/{projectId}/tasks")
@@ -49,12 +56,11 @@ public class TaskController {
     }
     @PutMapping("/projects/{projectId}/tasks/{id}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    TaskDto update(@PathVariable Long projectId,
-                @PathVariable Long id,
+    TaskDto update(@PathVariable Long id,
                 @RequestBody @Validated UpdateTaskRequest request) {
         UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.deadline(), request.tags());
         log.info("UpdateTaskCommand has been created!");
-        return taskService.update(cmd, projectId);
+        return taskService.update(cmd);
     }
 
     @DeleteMapping("/projects/{projectId}/tasks/{id}")
