@@ -37,6 +37,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<ProjectDto> getAllProjectsByQuery(Long userId, String query) {
+        log.info("Getting all projects for user with ID: {} and query: {}", userId, query);
+        List<Project> projects = projectRepository.findByQueryAndUserId(query, userId);
+        return projects.stream()
+                .map(ProjectDto::from)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public ProjectDto create(CreateProjectCommand cmd) {
         log.info("Creating a new project: {}", cmd.id());

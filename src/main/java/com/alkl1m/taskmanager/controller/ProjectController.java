@@ -4,7 +4,6 @@ import com.alkl1m.taskmanager.dto.auth.MessageResponse;
 import com.alkl1m.taskmanager.dto.project.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.project.ProjectService;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +24,13 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/projects")
-    public List<ProjectDto> getAllProjects(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return projectService.getAllProjects(userDetails.getId());
+    public List<ProjectDto> getAllProjects(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           @RequestParam(required = false) String query) {
+        if (query != null && !query.isEmpty()) {
+            return projectService.getAllProjectsByQuery(userDetails.getId(), query);
+        } else {
+            return projectService.getAllProjects(userDetails.getId());
+        }
     }
 
     @PostMapping("/projects")
