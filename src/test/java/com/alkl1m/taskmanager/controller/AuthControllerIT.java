@@ -1,5 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
+import com.alkl1m.taskmanager.TestBeans;
 import com.alkl1m.taskmanager.dto.auth.LoginRequest;
 import com.alkl1m.taskmanager.dto.auth.SignupRequest;
 import com.alkl1m.taskmanager.entity.User;
@@ -7,23 +8,14 @@ import com.alkl1m.taskmanager.enums.Role;
 import com.alkl1m.taskmanager.repository.RefreshTokenRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,13 +23,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
-@SpringBootTest
+@SpringBootTest(classes = TestBeans.class)
 @AutoConfigureMockMvc
 class AuthControllerIT {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -50,8 +38,8 @@ class AuthControllerIT {
     public void handleRegisterUser_PayloadIsValid_ReturnsValidResponseMessage() throws Exception {
         SignupRequest signupRequest = new SignupRequest("Jane Doe", "jane@example.com", "password");
         mockMvc.perform(post("/api/auth/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(signupRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(signupRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User registered successfully!"));
     }
@@ -112,8 +100,15 @@ class AuthControllerIT {
 
     @Test
     public void handleRefreshToken_PayloadIsValid_ReturnsValidMessageAndStatus() throws Exception {
-        refreshTokenRepository.deleteAll();
-        LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
+        User user = User.builder()
+                .name("Bob")
+                .email("bob@example.com")
+                .password(passwordEncoder.encode("password"))
+                .role(Role.USER)
+                .enabled(true)
+                .build();
+        userRepository.save(user);
+        LoginRequest loginRequest = new LoginRequest("bob@example.com", "password");
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(loginRequest)))

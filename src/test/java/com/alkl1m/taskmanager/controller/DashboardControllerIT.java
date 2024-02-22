@@ -1,5 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
+import com.alkl1m.taskmanager.TestBeans;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
@@ -20,11 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 
@@ -32,14 +29,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
-@SpringBootTest
+@SpringBootTest(classes = TestBeans.class)
 @AutoConfigureMockMvc
 class DashboardControllerIT {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
-
     @Autowired
     MockMvc mockMvc;
     @Autowired
