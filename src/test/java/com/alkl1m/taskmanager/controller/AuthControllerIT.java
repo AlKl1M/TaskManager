@@ -35,7 +35,7 @@ class AuthControllerIT {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
     @Test
-    public void handleRegisterUser_PayloadIsValid_ReturnsValidResponseMessage() throws Exception {
+    public void signupUserWithValidRequest_returnsValidMessage() throws Exception {
         SignupRequest signupRequest = new SignupRequest("Jane Doe", "jane@example.com", "password");
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleRegisterNewUser_ExistingEmail_ReturnsBadRequest() throws Exception {
+    public void signupUserWithExistingEmail_ReturnsBadRequest() throws Exception {
         User user = User.builder()
                 .name("John")
                 .email("john@example.com")
@@ -62,7 +62,7 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleRegisterNewUser_ExistingName_ReturnBadRequest() throws Exception {
+    public void signupUserWithExistingName_ReturnsBadRequest() throws Exception {
         User user = User.builder()
                 .name("John Doe")
                 .email("johnn@example.com")
@@ -79,7 +79,9 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleAuthenticateUser_PayloadIsValid_ReturnsValidResponseMessage() throws Exception {
+    public void loginUserWithValidRequest_ReturnsValidResponseMessage() throws Exception {
+        refreshTokenRepository.deleteAll();
+        userRepository.deleteAll();
         User user = User.builder()
                 .name("test")
                 .email("test@example.com")
@@ -99,7 +101,7 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleRefreshToken_PayloadIsValid_ReturnsValidMessageAndStatus() throws Exception {
+    public void refreshTokenWithValidRequest_ReturnsValidMessageAndStatus() throws Exception {
         User user = User.builder()
                 .name("Bob")
                 .email("bob@example.com")
@@ -130,7 +132,7 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleRefreshToken_InvalidPayload_ReturnsBadRequestMessage() throws Exception {
+    public void refreshTokenWithInvalidPayload_ReturnsBadRequestMessage() throws Exception {
         LoginRequest loginRequest = new LoginRequest("test@example.com", "password");
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,13 +148,11 @@ class AuthControllerIT {
     }
 
     @Test
-    public void handleLogoutUser_RequestIsValid_ReturnValidMessage() throws Exception {
+    public void logoutUserWithValidRequest_ReturnValidMessage() throws Exception {
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("You've been signed out!"));
     }
-
-
 
     private String asJsonString(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

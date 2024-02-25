@@ -76,32 +76,38 @@ class ProjectControllerIT {
 
 
     @Test
-    void testGetAllProjectsWhenQueryIsNull() throws Exception {
+    void testGetAllProjectsWithNullQuery_ReturnsValidEntity() throws Exception {
         mockMvc.perform(get("/api/user/projects"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(2))
-                .andExpect(jsonPath("$[0].name").value("test1 project"));
+                .andExpectAll(
+                    status().isOk(),
+                    jsonPath("$.length()").value(1),
+                    jsonPath("$[0].id").exists(),
+                    jsonPath("$[0].name").value("test1 project")
+                );
     }
 
     @Test
-    void handleGetAllProjects_WithQuery_ReturnsValidResponse() throws Exception {
+    void getAllProjectsWithQuery_ReturnsValidEntity() throws Exception {
         mockMvc.perform(get("/api/user/projects?query=t"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(4))
-                .andExpect(jsonPath("$[0].name").value("test1 project"));
+                .andExpectAll(
+                    status().isOk(),
+                    jsonPath("$.length()").value(1),
+                    jsonPath("$[0].id").exists(),
+                    jsonPath("$[0].name").value("test1 project")
+                );
     }
 
     @Test
-    void handleGetAllProjects_WithZeroProjects_ReturnsValidEntity() throws Exception {
+    void getAllProjectsWithZeroProjects_ReturnsValidEntity() throws Exception {
         mockMvc.perform(get("/api/user/projects?query=noProjectsExists"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpectAll(
+                    status().isOk(),
+                    jsonPath("$.length()").value(0)
+                );
     }
 
     @Test
-    void handleCreateNewProject_PayloadIsValid_ReturnsValidResponse() throws Exception {
+    void createNewProjectWithValidPayload_ReturnsValidEntity() throws Exception {
         mockMvc.perform(post("/api/user/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -110,11 +116,13 @@ class ProjectControllerIT {
                                     "description": "project 1 description"
                                 }
                                 """))
-                .andExpect(status().isCreated());
+                .andExpect(
+                        status().isCreated()
+                );
     }
 
     @Test
-    public void handleUpdateNewProject_PayloadIsValid_ReturnsValidStatus() throws Exception {
+    public void updateNewProjectWithValidPayload_ReturnsValidStatus() throws Exception {
         mockMvc.perform(put("/api/user/projects/{id}", project1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -123,18 +131,22 @@ class ProjectControllerIT {
                     "description": "new project 1 description"
                 }
                 """))
-                .andExpect(status().isOk());
+                .andExpect(
+                        status().isOk()
+                );
     }
 
     @Test
-    public void handleDeleteProject_ProjectExists_ReturnsValidResponseAndProjectExists() throws Exception {
+    public void deleteProjectWithExistingProjects_ReturnsValidResponse() throws Exception {
         mockMvc.perform(delete("/api/user/projects/{id}", project1.getId()))
                 .andExpect(status().isOk());
-        assertFalse(projectRepository.existsById(project1.getId()));
+        assertFalse(projectRepository.existsById(
+                project1.getId())
+        );
     }
 
     @Test
-    public void handleChangeStatus_ProjectExists_ReturnsValidResponseAndUpdateProject() throws Exception {
+    public void changeStatusWithExistingProjects_ReturnsValidResponse() throws Exception {
         mockMvc.perform(put("/api/user/projects/{id}/changeStatus", project1.getId()))
                 .andExpect(status().isOk());
         Project updatedProject = projectRepository.findById(project1.getId()).orElse(null);

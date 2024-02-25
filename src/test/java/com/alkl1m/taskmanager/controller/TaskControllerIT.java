@@ -16,23 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -118,7 +111,7 @@ public class TaskControllerIT {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.length()").value(1),
-                        jsonPath("$[0].id").value(1L),
+                        jsonPath("$[0].id").exists(),
                         jsonPath("$[0].name").value("Apple")
                 );
     }
@@ -129,7 +122,7 @@ public class TaskControllerIT {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.length()").value(1),
-                        jsonPath("$[0].id").value(1L),
+                        jsonPath("$[0].id").exists(),
                         jsonPath("$[0].name").value("Apple")
                 );
     }
