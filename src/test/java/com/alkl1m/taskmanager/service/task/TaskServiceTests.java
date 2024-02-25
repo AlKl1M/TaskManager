@@ -248,7 +248,7 @@ public class TaskServiceTests {
         when(taskRepository.findById(updateTaskCommand.id())).thenReturn(Optional.of(task1));
         when(taskRepository.save(any(Task.class))).thenReturn(task1);
 
-        TaskDto taskDtoResult = taskService.update(updateTaskCommand, project.getId());
+        TaskDto taskDtoResult = taskService.update(updateTaskCommand);
 
         assertNotNull(taskDtoResult);
         assertEquals(task1.getName(), taskDtoResult.name());

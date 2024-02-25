@@ -37,7 +37,7 @@ public class TaskController {
     }
 
     @PostMapping("/projects/{projectId}/tasks")
-    ResponseEntity<MessageResponse> create(@PathVariable Long projectId,
+    ResponseEntity<MessageResponse> createTask(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
         CreateTaskCommand cmd = CreateTaskCommand.builder()
@@ -54,26 +54,27 @@ public class TaskController {
                 .buildAndExpand(projectId, task.id()).toUri();
         return ResponseEntity.created(location).body(new MessageResponse("Task created successfully"));
     }
-    @PutMapping("/projects/{projectId}/tasks/{id}")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    TaskDto update(@PathVariable Long id,
+    @PutMapping("/projects/{projectId}/tasks/{taskId}")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    TaskDto updateTask(@PathVariable Long projectId,
+                       @PathVariable Long taskId,
                 @RequestBody @Validated UpdateTaskRequest request) {
-        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.deadline(), request.tags());
+        UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
         log.info("UpdateTaskCommand has been created!");
         return taskService.update(cmd);
     }
 
-    @DeleteMapping("/projects/{projectId}/tasks/{id}")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    ResponseEntity<String> delete(@PathVariable Long id) {
-        taskService.delete(id);
+    @DeleteMapping("/projects/{projectId}/tasks/{taskId}")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    ResponseEntity<String> deleteTask(@PathVariable Long projectId, @PathVariable Long taskId) {
+        taskService.delete(taskId);
         log.info("Task deleted successfully");
         return ResponseEntity.ok("Task deleted successfully");
     }
-    @PutMapping("/projects/{taskId}/tasks/{id}/done")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    ResponseEntity<String> changeStatus(@PathVariable Long id) {
-        taskService.changeStatus(id);
+    @PutMapping("/projects/{projectId}/tasks/{taskId}/done")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    ResponseEntity<String> changeStatusForTask(@PathVariable Long projectId, @PathVariable Long taskId) {
+        taskService.changeStatus(taskId);
         log.info("Task status changed successfully");
         return ResponseEntity.ok("Task status changed successfully");
     }
