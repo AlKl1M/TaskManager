@@ -23,7 +23,6 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
         if (token == null){
             return "Invalid PasswordResetToken";
         }
-        User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
         if ((token.getExpiryDate().getTime()-calendar.getTime().getTime()) <= 0){
             return "Link already expired, resend link";

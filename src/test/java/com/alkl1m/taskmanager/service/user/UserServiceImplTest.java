@@ -110,4 +110,15 @@ class UserServiceImplTest {
         assertFalse(user.getEnabled());
         verify(userRepository, times(0)).save(user);
     }
+
+    @Test
+    public void UserService_SaveVerificationToken(){
+        String verificationToken = "token";
+        VerificationToken token = new VerificationToken(verificationToken, user);
+        when(tokenRepository.save(any(VerificationToken.class))).thenReturn(token);
+
+        userService.saveUserVerificationToken(user, verificationToken);
+
+        verify(tokenRepository).save(any(VerificationToken.class));
+    }
 }

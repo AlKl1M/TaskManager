@@ -39,6 +39,7 @@ class ProjectServiceTest {
     private User user;
     private Project project1;
     private Project project2;
+    private CreateProjectCommand cmd;
 
     @BeforeEach
     public void setup() {
@@ -63,6 +64,11 @@ class ProjectServiceTest {
                 .status(Status.DONE)
                 .createdAt(Instant.now())
                 .user(user)
+                .build();
+        cmd = CreateProjectCommand.builder()
+                .id(1L)
+                .name("test1 project")
+                .description("test1 project description")
                 .build();
     }
 
@@ -102,18 +108,11 @@ class ProjectServiceTest {
 
     @Test
     public void shouldCreateNewProject_WhenCmdIsValidAndUserExists() {
-        CreateProjectCommand cmd = CreateProjectCommand.builder()
-                .id(1L)
-                .name("test1 project")
-                .description("test1 project description")
-                .build();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
         when(userRepository.countUserProjects(user.getId())).thenReturn(10);
-
         when(projectRepository.save(any(Project.class))).thenReturn(project1);
+
         ProjectDto result = projectService.create(cmd);
-        System.out.println(result.id());
         assertNotNull(result);
         assertEquals(project1.getId(), result.id());
         assertEquals(project1.getName(), result.name());
@@ -149,7 +148,6 @@ class ProjectServiceTest {
 
     @Test
     public void shouldThrowException_WhenUserReachedMaxNumOfProjects() {
-        CreateProjectCommand cmd = new CreateProjectCommand(1L, "Created Project", "Created Project Description");
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.countUserProjects(user.getId())).thenReturn(20);
 
@@ -161,7 +159,6 @@ class ProjectServiceTest {
 
     @Test
     public void shouldReturnNull_WhenUserDoesNotExists() {
-        CreateProjectCommand cmd = new CreateProjectCommand(1L, "Created Project", "Created Project Description");
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
         ProjectDto result = projectService.create(cmd);
         assertNull(result);
