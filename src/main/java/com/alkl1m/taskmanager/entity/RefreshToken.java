@@ -1,16 +1,16 @@
 package com.alkl1m.taskmanager.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 
-@Entity(name = "refresh_token")
-@Getter
-@Setter
+@Entity
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "refresh_tokens")
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

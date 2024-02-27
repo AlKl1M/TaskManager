@@ -1,10 +1,11 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.project.UpdateProjectRequest;
+import com.alkl1m.taskmanager.dto.auth.MessageResponse;
 import com.alkl1m.taskmanager.dto.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,55 +15,67 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/client")
+@RequestMapping("/api/user")
 public class TaskController {
     private final TaskService taskService;
-    @GetMapping("/projects/{projectId}/getAllTasks")
-    List<CreateBackTaskRequest> getAllTasks(
+    @GetMapping("/projects/{projectId}/getAllTasksBySearchWord")
+    List<CreateBackTaskDto> getAllTasksBySearchWord(
             @PathVariable Long projectId,
-            @RequestParam(name = "tag", defaultValue = "") FindTasksTags request,
+            @RequestParam(required = false) String searchWord,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return taskService.getAllTasks(userDetails.getId(), request, projectId);
+        return taskService.getAllTasksBySearchWord(userDetails.getId(), projectId, searchWord);
+    }
+    @GetMapping("/projects/{projectId}/getAllTasksByTag")
+    List<CreateBackTaskDto> getAllTasksByTag(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String tag,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return taskService.getAllTasksByTag(userDetails.getId(), projectId, tag);
     }
 
     @PostMapping("/projects/{projectId}/tasks")
-    ResponseEntity<TaskDto> create(@PathVariable Long projectId,
+    ResponseEntity<?> createTask(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        CreateTaskCommand cmd = new CreateTaskCommand(
-                userDetails.getId(),
-                request.name(),
-                request.description(),
-                request.tags());
+        CreateTaskCommand cmd = CreateTaskCommand.builder()
+                .id(userDetails.getId())
+                .name(request.name())
+                .description(request.description())
+                .tags(request.tags())
+                .deadline(request.deadline())
+                .build();
         TaskDto task = taskService.create(cmd, projectId);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/api/projects/{projectId}/tasks/{taskId}")
                 .buildAndExpand(projectId, task.id()).toUri();
-        return ResponseEntity.created(location).body(task);
+        return ResponseEntity.created(location).body(new MessageResponse("Task created successfully"));
     }
-    @PutMapping("/projects/{projectId}/tasks/{id}")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    TaskDto update(@PathVariable Long projectId,
-                @PathVariable Long id,
+    @PutMapping("/projects/{projectId}/tasks/{taskId}")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    ResponseEntity<?> updateTask(@PathVariable Long taskId,
                 @RequestBody @Validated UpdateTaskRequest request) {
-        UpdateTaskCommand cmd = new UpdateTaskCommand(id, request.name(), request.description(), request.tags());
-        return taskService.update(cmd, projectId);
-    }
-
-    @DeleteMapping("/projects/{projectId}/tasks/{id}")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    ResponseEntity<String> delete(@PathVariable Long id) {
-        taskService.delete(id);
+        UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
+        taskService.update(cmd);
+        log.info("UpdateTaskCommand has been created!");
         return ResponseEntity.ok("Task deleted successfully");
     }
-    @PutMapping("/projects/{taskId}/tasks/{id}/done")
-    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #id)")
-    ResponseEntity<String> changeStatus(@PathVariable Long id) {
-        taskService.changeStatus(id);
+
+    @DeleteMapping("/projects/{projectId}/tasks/{taskId}")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
+        taskService.delete(taskId);
+        log.info("Task deleted successfully");
+        return ResponseEntity.ok("Task deleted successfully");
+    }
+    @PutMapping("/projects/{projectId}/tasks/{taskId}/done")
+    @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    ResponseEntity<?> changeTaskStatus(@PathVariable Long taskId) {
+        taskService.changeStatus(taskId);
+        log.info("Task status changed successfully");
         return ResponseEntity.ok("Task status changed successfully");
     }
 }

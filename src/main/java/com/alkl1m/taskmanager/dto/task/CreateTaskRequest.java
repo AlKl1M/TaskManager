@@ -2,7 +2,7 @@ package com.alkl1m.taskmanager.dto.task;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 public record CreateTaskRequest(
@@ -10,6 +10,6 @@ public record CreateTaskRequest(
         String name,
         @NotEmpty(message = "Description is required")
         String description,
-
+        Instant deadline,
         List<String> tags
         ) {}

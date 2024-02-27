@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 public class AccessChecker {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
-
-
     public boolean isTaskBelongToUser(@NotNull UserDetailsImpl userDetails,
                                       @NotNull Long id){
         return taskRepository.getTaskById(id)
@@ -21,7 +19,6 @@ public class AccessChecker {
                 .getId()
                 .equals(userDetails.getId());
     }
-
     public boolean isProjectBelongToUser(@NotNull UserDetailsImpl userDetails,
                                          @NotNull Long id) {
         return projectRepository.getProjectById(id)

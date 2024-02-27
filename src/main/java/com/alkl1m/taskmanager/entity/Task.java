@@ -3,16 +3,20 @@ package com.alkl1m.taskmanager.entity;
 import com.alkl1m.taskmanager.enums.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name="tasks")
 public class Task {
     @Id
@@ -26,6 +30,8 @@ public class Task {
     private Instant createdAt;
     @Column(name="done_at")
     private Instant doneAt;
+    @Column(name="deadline")
+    private Instant deadline;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;

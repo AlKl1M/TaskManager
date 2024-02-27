@@ -4,6 +4,8 @@ import com.alkl1m.taskmanager.entity.RefreshToken;
 import com.alkl1m.taskmanager.exception.TokenRefreshException;
 import com.alkl1m.taskmanager.repository.RefreshTokenRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
+    @Setter
+    @Getter
     @Value("${application.security.jwt.refreshExpirationMs}")
     private Long refreshTokenDurationMs;
     @Autowired
@@ -46,8 +50,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public int deleteByUserId(Long userId) {
-        return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    public void deleteByUserId(Long userId) {
+        refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
     }
-
 }

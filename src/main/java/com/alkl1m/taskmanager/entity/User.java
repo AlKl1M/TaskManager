@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,13 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = "name"),
         @UniqueConstraint(columnNames = "email")
     })
-public class User{
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,10 +37,11 @@ public class User{
     private String email;
 
     @NotBlank
-    @Size(max = 120)
+    @Size(max = 80)
     private String password;
 
     private Role role;
+    private Boolean enabled = false;
 
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
