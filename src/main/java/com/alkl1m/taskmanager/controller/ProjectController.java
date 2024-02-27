@@ -26,7 +26,7 @@ public class ProjectController {
     @GetMapping("/projects")
     public List<ProjectDto> getAllProjects(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestParam(required = false) String query) {
-        if (query != null && !query.isEmpty()) {
+        if (query != null) {
             return projectService.getAllProjectsByQuery(userDetails.getId(), query);
         } else {
             return projectService.getAllProjects(userDetails.getId());
@@ -34,7 +34,7 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    ResponseEntity<MessageResponse> create(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    ResponseEntity<MessageResponse> createProject(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                       @RequestBody @Validated CreateProjectRequest request) {
         CreateProjectCommand cmd = CreateProjectCommand.builder()
                 .id(userDetails.getId())
@@ -47,21 +47,22 @@ public class ProjectController {
                 .path("/api/projects/{id}")
                 .buildAndExpand(project.id()).toUri();
         return ResponseEntity.created(location)
-                        .body(new MessageResponse("Project created successfully!"));
+                        .body(new MessageResponse("Project created successfully"));
     }
 
     @PutMapping("/projects/{id}")
     @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    void update(@PathVariable(name = "id") Long id,
-                @RequestBody @Validated UpdateProjectRequest request) {
+    ResponseEntity<?> updateProject(@PathVariable(name = "id") Long id,
+                                         @RequestBody @Validated UpdateProjectRequest request) {
         UpdateProjectCommand cmd = new UpdateProjectCommand(id, request.name(), request.description());
         projectService.update(cmd);
         log.info("Project updated");
+        return ResponseEntity.ok("Project updated successfully");
     }
 
     @DeleteMapping("/projects/{id}")
     @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    ResponseEntity<?> delete(@PathVariable(name = "id") Long id) {
+    ResponseEntity<?> deleteProject(@PathVariable(name = "id") Long id) {
         projectService.delete(id);
         log.info("Project deleted");
         return ResponseEntity.ok().build();
@@ -69,7 +70,8 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/changeStatus")
     @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    void changeStatus(@PathVariable(name = "id") Long id) {
+    ResponseEntity<?> changeProjectStatus(@PathVariable(name = "id") Long id) {
         projectService.changeStatus(id);
+        return ResponseEntity.ok("Project status changed successfully");
     }
 }

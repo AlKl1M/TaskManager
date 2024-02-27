@@ -52,6 +52,7 @@ $ grant all privileges on database taskmanager to taskmanager;
 
 <h4>Run the app</h4>
 Now you can run the app locally or deploy it using docker
+
 ```bash
 $ docker compose up
 ```

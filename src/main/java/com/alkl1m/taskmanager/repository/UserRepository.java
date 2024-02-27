@@ -17,4 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int countUserProjects(@Param("userId") Long userId);
 
     boolean existsByName(String name);
+
+    Optional<User> findByEmailOrName(String email, String name);
+
+    boolean existsByEmailOrName(String email, String name);
 }
