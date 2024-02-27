@@ -3,7 +3,6 @@ package com.alkl1m.taskmanager.dto.task;
 import lombok.Builder;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Builder

@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public String validatePasswordResetToken(String passwordResetToken) {
+    public boolean validatePasswordResetToken(String passwordResetToken) {
         return passwordResetTokenService.validatePasswordResetToken(passwordResetToken);
     }
 
@@ -47,20 +47,19 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public String validateToken(String theToken) {
+    public boolean validateToken(String theToken) {
         VerificationToken token = tokenRepository.findByToken(theToken);
         if(token == null){
-            return "Invalid verification token";
+            return false;
         }
         User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
         if ((token.getExpirationTime().getTime()-calendar.getTime().getTime())<= 0){
-            return "Verification link already expired," +
-                    " Please, click the link below to receive a new verification link";
+            return false;
         }
         user.setEnabled(true);
         userRepository.save(user);
-        return "valid";
+        return true;
     }
 
     @Override

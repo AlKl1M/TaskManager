@@ -19,12 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -32,15 +30,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskServiceTests {
-
     @Mock
     private TaskRepository taskRepository;
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private ProjectRepository projectRepository;
-
     @InjectMocks
     private TaskServiceImpl taskService;
     @InjectMocks
@@ -50,7 +45,6 @@ public class TaskServiceTests {
     private Project project;
     private CreateTaskCommand createTaskCommand;
     private CreateProjectCommand createProjectCommand;
-
     private User user;
 
     @BeforeEach
@@ -121,10 +115,8 @@ public class TaskServiceTests {
         when(projectRepository.save(any(Project.class))).thenReturn(project);
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
         when(taskRepository.save(any(Task.class))).thenReturn(task1);
-
         ProjectDto projectSaved = projectService.create(createProjectCommand);
         TaskDto taskSavedResult = taskService.create(createTaskCommand, projectSaved.id());
-
         assertNotNull(taskSavedResult);
         assertEquals(task1.getId(), taskSavedResult.id());
         assertEquals(task1.getName(), taskSavedResult.name());
@@ -143,10 +135,8 @@ public class TaskServiceTests {
                 .deadline(Instant.MAX)
                 .tags(List.of("tag1", "tag2", "tag3", "tag4"))
                 .build();
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class, ()-> {
-            taskService.create(createTaskCommand, project.getId());
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                ()-> taskService.create(createTaskCommand, project.getId()));
         assertEquals("Tags size should be > 2 and < 20, maxTags = 3", exception.getMessage());
     }
     @Test
@@ -158,7 +148,6 @@ public class TaskServiceTests {
                 .deadline(Instant.MAX)
                 .tags(List.of("123456789012345678901", "t", "tag3"))
                 .build();
-
         IllegalStateException exception = assertThrows(IllegalStateException.class, ()-> {
             taskService.create(createTaskCommand, project.getId());
         });
@@ -173,11 +162,8 @@ public class TaskServiceTests {
                 .deadline(Instant.MAX)
                 .tags(List.of("tag1", "tag2", "tag3"))
                 .build();
-
         when(projectRepository.findById(project.getId())).thenReturn(Optional.empty());
-
         TaskDto taskSavedResult = taskService.create(createTaskCommand, project.getId());
-
         assertNull(taskSavedResult);
         verify(projectRepository).findById(project.getId());
     }
@@ -189,10 +175,8 @@ public class TaskServiceTests {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
         when(taskRepository.getAllTasksBySearchWord(user.getId(), project, searchWord)).thenReturn(listBackTask);
-
         List<CreateBackTaskDto> backTaskDtoResult =
                 taskService.getAllTasksBySearchWord(user.getId(), project.getId(), searchWord);
-
         assertEquals(1, backTaskDtoResult.size());
         assertEquals(task1.getId(), backTaskDtoResult.get(0).id());
         assertEquals(task1.getName(), backTaskDtoResult.get(0).name());
@@ -204,10 +188,8 @@ public class TaskServiceTests {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
         when(taskRepository.getAllTasksByTag(user.getId(), project, tag)).thenReturn(listBackTask);
-
         List<CreateBackTaskDto> backTaskDtoResult =
                 taskService.getAllTasksByTag(user.getId(), project.getId(), tag);
-
         assertEquals(1, backTaskDtoResult.size());
         assertEquals(task1.getId(), backTaskDtoResult.get(0).id());
         assertEquals(task1.getName(), backTaskDtoResult.get(0).name());
@@ -218,18 +200,14 @@ public class TaskServiceTests {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
         when(taskRepository.getAllTasks(user.getId(), project)).thenReturn(listBackTask);
-
         List<CreateBackTaskDto> backTaskDtoResultNullSearchWord =
                 taskService.getAllTasksBySearchWord(user.getId(), project.getId(), null);
         List<CreateBackTaskDto> backTaskDtoResultNullTag =
                 taskService.getAllTasksByTag(user.getId(), project.getId(), null);
-
         assertEquals(2, backTaskDtoResultNullSearchWord.size());
         assertEquals(2, backTaskDtoResultNullTag.size());
-
         assertEquals(task1.getId(), backTaskDtoResultNullSearchWord.get(0).id());
         assertEquals(task2.getId(), backTaskDtoResultNullSearchWord.get(1).id());
-
         assertEquals(task1.getId(), backTaskDtoResultNullTag.get(0).id());
         assertEquals(task2.getId(), backTaskDtoResultNullTag.get(1).id());
 
@@ -237,7 +215,7 @@ public class TaskServiceTests {
 
 
     @Test
-    public void TaskService_UpdateTask_ReturnTaskDto(){
+    public void TaskService_UpdateTask_ReturnsValidResponse(){
         UpdateTaskCommand updateTaskCommand = new UpdateTaskCommand(
                 1L,
                 "NewName",
@@ -247,19 +225,14 @@ public class TaskServiceTests {
         );
         when(taskRepository.findById(updateTaskCommand.id())).thenReturn(Optional.of(task1));
         when(taskRepository.save(any(Task.class))).thenReturn(task1);
-
-        TaskDto taskDtoResult = taskService.update(updateTaskCommand);
-
-        assertNotNull(taskDtoResult);
-        assertEquals(task1.getName(), taskDtoResult.name());
-        assertEquals(task1.getDescription(), taskDtoResult.description());
+        taskService.update(updateTaskCommand);
+        assertEquals(task1.getName(), updateTaskCommand.name());
+        assertEquals(task1.getDescription(), updateTaskCommand.description());
     }
     @Test
     public void TaskService_DeleteTask(){
         when(taskRepository.findById(task1.getId())).thenReturn(Optional.of(task1));
-
         taskService.delete(task1.getId());
-
         verify(taskRepository).delete(task1);
     }
 
@@ -267,9 +240,7 @@ public class TaskServiceTests {
     public void TaskService_ChangeStatusWithStatusInWork(){
         when(taskRepository.findById(task1.getId())).thenReturn(Optional.of(task1));
         when(taskRepository.save(any(Task.class))).thenReturn(task1);
-
         taskService.changeStatus(task1.getId());
-
         assertEquals(Status.DONE, task1.getStatus());
         verify(taskRepository).save(task1);
     }
@@ -278,9 +249,7 @@ public class TaskServiceTests {
     public void TaskService_ChangeStatusWithStatusDone(){
         when(taskRepository.findById(task2.getId())).thenReturn(Optional.of(task2));
         when(taskRepository.save(any(Task.class))).thenReturn(task2);
-
         taskService.changeStatus(task2.getId());
-
         assertEquals(Status.IN_WORK, task2.getStatus());
         verify(taskRepository).save(task2);
     }

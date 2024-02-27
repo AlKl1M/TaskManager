@@ -1,16 +1,13 @@
 package com.alkl1m.taskmanager.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Calendar;
 import java.util.Date;
-
-@Getter
-@Setter
 @Entity
+@Data
 @NoArgsConstructor
 public class VerificationToken {
     @Id
@@ -28,12 +25,6 @@ public class VerificationToken {
         super();
         this.token = token;
         this.user = user;
-        this.expirationTime = this.getTokenExpirationTime();
-    }
-
-    public VerificationToken(String token) {
-        super();
-        this.token = token;
         this.expirationTime = this.getTokenExpirationTime();
     }
 

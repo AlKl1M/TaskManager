@@ -18,20 +18,17 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
         passwordResetTokenRepository.save(passwordResetToken);
     }
 
-    public String validatePasswordResetToken(String theToken){
+    public boolean validatePasswordResetToken(String theToken){
         PasswordResetToken token = passwordResetTokenRepository.findByToken(theToken);
         if (token == null){
-            return "Invalid PasswordResetToken";
+            return false;
         }
         Calendar calendar = Calendar.getInstance();
-        if ((token.getExpiryDate().getTime()-calendar.getTime().getTime()) <= 0){
-            return "Link already expired, resend link";
-        }
-        return "valid";
+        return (token.getExpiryDate().getTime() - calendar.getTime().getTime()) > 0;
     }
 
-    public Optional<User> findUserByPasswordToken(String passwrdToken){
-        return Optional.ofNullable(passwordResetTokenRepository.findByToken(passwrdToken).getUser());
+    public Optional<User> findUserByPasswordToken(String passwordToken){
+        return Optional.ofNullable(passwordResetTokenRepository.findByToken(passwordToken).getUser());
     }
 
 }

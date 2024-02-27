@@ -128,8 +128,6 @@ public class AuthController {
     }
 
     public String applicationUrl(HttpServletRequest request){
-        System.out.println("http://" + request.getServerName() + ":" +
-                request.getServerPort() + request.getContextPath());
         return "http://" + request.getServerName() + ":" +
                 request.getServerPort() + request.getContextPath();
     }

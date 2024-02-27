@@ -1,6 +1,7 @@
 package com.alkl1m.taskmanager.controller;
 
 import com.alkl1m.taskmanager.TestBeans;
+import com.alkl1m.taskmanager.dto.project.CreateProjectRequest;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Role;
@@ -8,6 +9,8 @@ import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,27 +105,21 @@ class ProjectControllerIT {
 
     @Test
     void handleCreateNewProject_PayloadIsValid_ReturnsValidResponse() throws Exception {
+        CreateProjectRequest createProjectRequest =
+                new CreateProjectRequest("project 1", "project 1 description");
         mockMvc.perform(post("/api/user/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "name": "project 1",
-                                    "description": "project 1 description"
-                                }
-                                """))
+                        .content(asJsonString(createProjectRequest)))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void handleUpdateNewProject_PayloadIsValid_ReturnsValidStatus() throws Exception {
+        CreateProjectRequest createProjectRequest =
+                new CreateProjectRequest("project 1", "project 1 description");
         mockMvc.perform(put("/api/user/projects/{id}", project1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                {
-                    "name": "new project 1",
-                    "description": "new project 1 description"
-                }
-                """))
+                .content(asJsonString(createProjectRequest)))
                 .andExpect(status().isOk());
     }
 
@@ -140,5 +137,9 @@ class ProjectControllerIT {
         Project updatedProject = projectRepository.findById(project1.getId()).orElse(null);
         assertNotNull(updatedProject);
         assertEquals(Status.DONE, updatedProject.getStatus());
+    }
+    private String asJsonString(Object object) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(object);
     }
 }

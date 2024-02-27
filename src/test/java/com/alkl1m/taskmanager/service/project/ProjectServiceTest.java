@@ -16,13 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -78,14 +76,11 @@ class ProjectServiceTest {
         projectRepository.deleteAll();
     }
 
-
     @Test
     public void shouldReturnAllProjects_WithValidProject() {
         List<Project> projects = Arrays.asList(project1, project2);
         when(projectRepository.findAllByUserId(user.getId())).thenReturn(projects);
-
         List<ProjectDto> result = projectService.getAllProjects(user.getId());
-
         assertEquals(2, result.size());
         assertEquals(project1.getId(), result.get(0).id());
         assertEquals(project1.getName(), result.get(0).name());
@@ -111,7 +106,6 @@ class ProjectServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.countUserProjects(user.getId())).thenReturn(10);
         when(projectRepository.save(any(Project.class))).thenReturn(project1);
-
         ProjectDto result = projectService.create(cmd);
         assertNotNull(result);
         assertEquals(project1.getId(), result.id());
@@ -122,12 +116,14 @@ class ProjectServiceTest {
 
     @Test
     public void shouldUpdateProject_WhenProjectExists() {
-        UpdateProjectCommand cmd = new UpdateProjectCommand(1L, "Updated Project", "Updated Description");
+        UpdateProjectCommand cmd = new UpdateProjectCommand(1L,
+                "Updated Project",
+                "Updated Description");
         when(projectRepository.findById(cmd.id())).thenReturn(Optional.of(project1));
         when(projectRepository.save(any(Project.class))).thenReturn(project1);
-        ProjectDto result = projectService.update(cmd);
-        assertNotNull(cmd.name(), result.name());
-        assertEquals(cmd.description(), result.description());
+        projectService.update(cmd);
+        assertEquals(project1.getName(), cmd.name());
+        assertEquals(project1.getDescription(), cmd.description());
     }
 
     @Test
@@ -150,7 +146,6 @@ class ProjectServiceTest {
     public void shouldThrowException_WhenUserReachedMaxNumOfProjects() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.countUserProjects(user.getId())).thenReturn(20);
-
         IllegalStateException exception = assertThrows(IllegalStateException.class, ()-> {
             projectService.create(cmd);
         });

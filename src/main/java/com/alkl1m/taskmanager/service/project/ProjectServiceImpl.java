@@ -74,14 +74,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectDto update(UpdateProjectCommand cmd) {
+    public void update(UpdateProjectCommand cmd) {
         log.info("Updating project with ID: {}", cmd.id());
         Project project = projectRepository.findById(cmd.id())
                 .orElseThrow(() -> ProjectNotFoundException.of(cmd.id()));
         project.setName(cmd.name());
         project.setDescription(cmd.description());
         log.info("Updated project with ID: {}", cmd.id());
-        return ProjectDto.from(projectRepository.save(project));
+        ProjectDto.from(projectRepository.save(project));
     }
 
     @Override
@@ -110,5 +110,4 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(project);
         log.info("Changed status for project with ID: {}", id);
     }
-
 }

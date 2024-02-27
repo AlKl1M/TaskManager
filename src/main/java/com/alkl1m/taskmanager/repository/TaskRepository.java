@@ -37,8 +37,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Task getTaskById(Long id);
     List<Task> findTop50ByUserIdOrderByDeadlineAsc(Long userId);
-
     int countByProjectIdAndStatus(Long id, Status status);
-
     int countByProjectId(Long id);
 }

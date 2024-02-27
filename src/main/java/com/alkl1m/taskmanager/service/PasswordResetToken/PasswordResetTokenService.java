@@ -8,6 +8,6 @@ import java.util.Optional;
 @Service
 public interface PasswordResetTokenService {
     void createPasswordResetTokenForUser(User user, String passwordToken);
-    String validatePasswordResetToken(String theToken);
-    Optional<User> findUserByPasswordToken(String passwrdToken);
+    boolean validatePasswordResetToken(String token);
+    Optional<User> findUserByPasswordToken(String passwordToken);
 }

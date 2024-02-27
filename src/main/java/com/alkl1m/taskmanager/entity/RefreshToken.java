@@ -5,12 +5,12 @@ import lombok.*;
 
 import java.time.Instant;
 
-@Entity(name = "refresh_token")
-@Getter
-@Setter
+@Entity
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "refresh_tokens")
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

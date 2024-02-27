@@ -1,11 +1,8 @@
 package com.alkl1m.taskmanager.service.user;
 
-import com.alkl1m.taskmanager.entity.Project;
-import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.entity.VerificationToken;
 import com.alkl1m.taskmanager.enums.Role;
-import com.alkl1m.taskmanager.enums.Status;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.repository.VerificationTokenRepository;
 import com.alkl1m.taskmanager.service.PasswordResetToken.PasswordResetTokenService;
@@ -16,12 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -31,8 +24,6 @@ class UserServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private PasswordResetTokenService passwordResetTokenService;
-    @Mock
-    private PasswordEncoder passwordEncoder;
     @Mock
     private VerificationTokenRepository tokenRepository;
     @InjectMocks
@@ -81,8 +72,8 @@ class UserServiceImplTest {
         expirationTime.add(Calendar.HOUR_OF_DAY, 1);
         token.setExpirationTime(expirationTime.getTime());
         when(tokenRepository.findByToken(validToken)).thenReturn(token);
-        String result = userService.validateToken(validToken);
-        assertEquals("valid", result);
+        boolean result = userService.validateToken(validToken);
+        assertTrue(result);
         assertTrue(user.getEnabled());
         verify(userRepository, times(1)).save(user);
     }
@@ -91,8 +82,8 @@ class UserServiceImplTest {
     public void shouldReturnInvalidVerificationToken_WhenTokenInvalid() {
         String invalidToken = "invalid-token";
         when(tokenRepository.findByToken(invalidToken)).thenReturn(null);
-        String result = userService.validateToken(invalidToken);
-        assertEquals("Invalid verification token", result);
+        boolean result = userService.validateToken(invalidToken);
+        assertFalse(result);
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -103,10 +94,9 @@ class UserServiceImplTest {
         Calendar expirationTime = Calendar.getInstance();
         expirationTime.add(Calendar.DAY_OF_MONTH, -1);
         token.setExpirationTime(expirationTime.getTime());
-
         when(tokenRepository.findByToken(expiredToken)).thenReturn(token);
-        String result = userService.validateToken(expiredToken);
-        assertEquals("Verification link already expired, Please, click the link below to receive a new verification link", result);
+        boolean result = userService.validateToken(expiredToken);
+        assertFalse(result);
         assertFalse(user.getEnabled());
         verify(userRepository, times(0)).save(user);
     }
@@ -116,9 +106,7 @@ class UserServiceImplTest {
         String verificationToken = "token";
         VerificationToken token = new VerificationToken(verificationToken, user);
         when(tokenRepository.save(any(VerificationToken.class))).thenReturn(token);
-
         userService.saveUserVerificationToken(user, verificationToken);
-
         verify(tokenRepository).save(any(VerificationToken.class));
     }
 }

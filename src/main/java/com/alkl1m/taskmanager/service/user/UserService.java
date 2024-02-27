@@ -6,18 +6,11 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<User> findByEmail(String email);
-
     void createPasswordResetTokenForUser(User user, String passwordToken);
-
     void saveUserVerificationToken(User theUser, String verificationToken);
-
-    String validatePasswordResetToken(String passwordResetToken);
-
+    boolean validatePasswordResetToken(String passwordResetToken);
     User findUserByPasswordToken(String passwordResetToken);
-
-    String validateToken(String token);
-
+    boolean validateToken(String token);
     void changePassword(User user, String s);
-
     boolean oldPasswordIsValid(User user, String s);
 }

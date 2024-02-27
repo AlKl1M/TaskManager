@@ -152,8 +152,6 @@ class AuthControllerIT {
                 .andExpect(jsonPath("$.message").value("You've been signed out!"));
     }
 
-
-
     private String asJsonString(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(object);

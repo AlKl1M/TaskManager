@@ -11,7 +11,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p WHERE (p.name LIKE %:query% OR p.description LIKE %:query%) AND p.user.id = :userId")
     List<Project> findByQueryAndUserId(@Param("query") String query, @Param("userId") Long userId);
     List<Project> findAllByUserId(Long userId);
-    List<Project> getAllProjectsByUserId(Long id);
-    Project getProjectById(Long id);
+    Project getProjectById(Long projectId);
     List<Project> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

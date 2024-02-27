@@ -37,7 +37,7 @@ public class TaskController {
     }
 
     @PostMapping("/projects/{projectId}/tasks")
-    ResponseEntity<MessageResponse> createTask(@PathVariable Long projectId,
+    ResponseEntity<?> createTask(@PathVariable Long projectId,
                                    @RequestBody @Validated CreateTaskRequest request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
         CreateTaskCommand cmd = CreateTaskCommand.builder()
@@ -56,24 +56,24 @@ public class TaskController {
     }
     @PutMapping("/projects/{projectId}/tasks/{taskId}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
-    TaskDto updateTask(@PathVariable Long projectId,
-                       @PathVariable Long taskId,
+    ResponseEntity<?> updateTask(@PathVariable Long taskId,
                 @RequestBody @Validated UpdateTaskRequest request) {
         UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
+        taskService.update(cmd);
         log.info("UpdateTaskCommand has been created!");
-        return taskService.update(cmd);
+        return ResponseEntity.ok("Task deleted successfully");
     }
 
     @DeleteMapping("/projects/{projectId}/tasks/{taskId}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
-    ResponseEntity<String> deleteTask(@PathVariable Long projectId, @PathVariable Long taskId) {
+    ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
         taskService.delete(taskId);
         log.info("Task deleted successfully");
         return ResponseEntity.ok("Task deleted successfully");
     }
     @PutMapping("/projects/{projectId}/tasks/{taskId}/done")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
-    ResponseEntity<String> changeStatusForTask(@PathVariable Long projectId, @PathVariable Long taskId) {
+    ResponseEntity<?> changeTaskStatus(@PathVariable Long taskId) {
         taskService.changeStatus(taskId);
         log.info("Task status changed successfully");
         return ResponseEntity.ok("Task status changed successfully");

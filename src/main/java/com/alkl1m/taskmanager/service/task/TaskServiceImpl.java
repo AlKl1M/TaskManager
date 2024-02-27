@@ -92,7 +92,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskDto update(UpdateTaskCommand cmd) {
+    public void update(UpdateTaskCommand cmd) {
         log.info("Updating task with ID: {}", cmd.id());
         Task task = taskRepository.findById(cmd.id())
                 .orElseThrow(() -> TaskNotFoundException.of(cmd.id()));
@@ -101,7 +101,7 @@ public class TaskServiceImpl implements TaskService {
         task.setDeadline(cmd.deadline());
         task.setTags(String.join("&#/!&", cmd.tags()));
         log.info("Updated task with ID: {}", cmd.id());
-        return TaskDto.from(taskRepository.save(task));
+        TaskDto.from(taskRepository.save(task));
     }
 
     @Override
@@ -128,7 +128,7 @@ public class TaskServiceImpl implements TaskService {
             task.setDoneAt(null);
         }
         taskRepository.save(task);
-        log.info("Changed status for project with ID: {}", id);
+        log.info("Changed status for task with ID: {}", id);
     }
 
 

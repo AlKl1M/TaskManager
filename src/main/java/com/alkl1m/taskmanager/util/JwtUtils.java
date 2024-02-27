@@ -13,26 +13,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
-
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-
     @Value("${application.security.jwt.secret}")
     private String jwtSecret;
-
     @Value("${application.security.jwt.expirationMs}")
     private int jwtExpirationMs;
-
     @Value("${application.security.jwt.cookieName}")
     private String jwtCookie;
-
     @Value("${application.security.jwt.refreshCookieName}")
     private String jwtRefreshCookie;
-
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
         String jwt = generateTokenFromEmail(userPrincipal.getEmail());
         return generateCookie(jwtCookie, jwt, "/api");
@@ -56,13 +50,11 @@ public class JwtUtils {
     }
 
     public ResponseCookie getCleanJwtCookie() {
-        ResponseCookie cookie = ResponseCookie.from(jwtCookie, null).path("/api").build();
-        return cookie;
+        return ResponseCookie.from(jwtCookie, null).path("/api").build();
     }
 
     public ResponseCookie getCleanJwtRefreshToken() {
-        ResponseCookie cookie = ResponseCookie.from(jwtRefreshCookie, null).path("/api/auth/refreshToken").build();
-        return cookie;
+        return ResponseCookie.from(jwtRefreshCookie, null).path("/api/auth/refreshToken").build();
     }
 
     public String getEmailFromJwtToken(String token) {
@@ -103,8 +95,7 @@ public class JwtUtils {
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
-        ResponseCookie cookie = ResponseCookie.from(name, value).path(path).maxAge(24 * 60 * 60).httpOnly(true).build();
-        return cookie;
+        return ResponseCookie.from(name, value).path(path).maxAge(24 * 60 * 60).httpOnly(true).build();
     }
 
     private String getCookieValueByName(HttpServletRequest request, String name) {

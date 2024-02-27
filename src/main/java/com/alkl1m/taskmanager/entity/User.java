@@ -37,7 +37,7 @@ public class User {
     private String email;
 
     @NotBlank
-    @Size(max = 120)
+    @Size(max = 80)
     private String password;
 
     private Role role;

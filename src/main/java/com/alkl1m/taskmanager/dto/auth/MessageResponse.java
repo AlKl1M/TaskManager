@@ -1,4 +1,5 @@
 package com.alkl1m.taskmanager.dto.auth;
 
-public record MessageResponse(String message) {
+public record MessageResponse(
+        String message) {
 }
