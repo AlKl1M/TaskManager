@@ -1,7 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
 import com.alkl1m.taskmanager.TestBeans;
-import com.alkl1m.taskmanager.dto.task.UpdateTaskRequest;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;
@@ -11,8 +10,6 @@ import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.TaskRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +22,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -145,20 +143,30 @@ public class TaskControllerIT {
     }
     @Test
     public void createTask_ReturnValidResponse() throws Exception {
-        UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest("Home2", "TestTask2DescriptionUpdated",null, List.of("tag2Updated"));
         mockMvc.perform(post("/api/user/projects/{projectId}/tasks", project.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(updateTaskRequest)))
+                        .content("""
+                            {
+                                "name": "Home",
+                                "description": "TestTask2Description",
+                                "tags": ["tag2"]
+                            }
+                            """))
                 .andExpect(
                         status().isCreated()
                 );
     }
     @Test
     public void updateTask_ReturnValidResponse() throws Exception {
-        UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest("Home2", "TestTask2DescriptionUpdated",null, List.of("tag2Updated"));
         mockMvc.perform(put("/api/user/projects/{projectId}/tasks/{taskId}", project.getId(),task2.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(updateTaskRequest)))
+                        .content("""
+                            {
+                                "name": "Home2",
+                                "description": "TestTask2DescriptionUpdated",
+                                "tags": ["tag2Updated"]
+                            }
+                            """))
                 .andExpect(
                         status().isOk()
                 );
@@ -176,10 +184,6 @@ public class TaskControllerIT {
                 .andExpect(
                         status().isOk()
                 );
-    }
-    private String asJsonString(Object object) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(object);
     }
 
 }

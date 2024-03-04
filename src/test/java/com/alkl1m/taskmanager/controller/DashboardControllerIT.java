@@ -82,7 +82,7 @@ class DashboardControllerIT {
     }
 
     @Test
-    public void handleGetDashboardData_RequestIsValid_ReturnsValidResponseEntity() throws Exception {
+    public void getDashboardDataWithValidRequest_ReturnsValidResponseEntity() throws Exception {
         mockMvc.perform(get("/api/user/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.projects").isArray())

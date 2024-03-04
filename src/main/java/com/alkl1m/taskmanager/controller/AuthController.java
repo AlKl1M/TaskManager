@@ -61,13 +61,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest,
                                           final HttpServletRequest request) {
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            return ResponseEntity
-                    .badRequest()
-                    .build();
-        }
-
-        if (userRepository.existsByName(signupRequest.name())) {
+        if (userRepository.existsByEmailOrName(signupRequest.email(), signupRequest.name())) {
             return ResponseEntity
                     .badRequest()
                     .build();
@@ -88,7 +82,7 @@ public class AuthController {
         log.info("Refreshing token...");
         String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
         log.debug("Refresh token: {}", refreshToken);
-        if ((refreshToken != null) && (refreshToken.length() > 0)) {
+        if ((refreshToken != null) && (!refreshToken.isEmpty())) {
             return refreshTokenService.findByToken(refreshToken)
                     .map(refreshTokenService::verifyExpiration)
                     .map(RefreshToken::getUser)
@@ -107,13 +101,12 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    public ResponseEntity<?> logout() {
         log.info("Logging out user");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
-            if (principal instanceof UserDetailsImpl) {
-                UserDetailsImpl userDetails = (UserDetailsImpl) principal;
+            if (principal instanceof UserDetailsImpl userDetails) {
                 Long userId = userDetails.getId();
                 refreshTokenService.deleteByUserId(userId);
             }

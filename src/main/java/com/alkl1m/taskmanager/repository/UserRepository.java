@@ -15,4 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT COUNT(p) FROM User u JOIN u.projects p WHERE u.id = :userId")
     int countUserProjects(@Param("userId") Long userId);
     boolean existsByName(String name);
+
+    Optional<User> findByEmailOrName(String email, String name);
+
+    boolean existsByEmailOrName(String email, String name);
 }

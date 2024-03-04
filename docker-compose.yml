@@ -1,0 +1,27 @@
+version: '3'
+services:
+  psql-db:
+    image: postgres
+    container_name: psql-db
+    restart: always
+    environment:
+      - POSTGRES_USER=taskmanager
+      - POSTGRES_PASSWORD=taskmanager
+      - POSTGRES_DB=taskmanager
+    ports:
+      - '5432:5432'
+
+  taskmanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskmanager
+    ports:
+      - '8081:8080'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://psql-db:5432/taskmanager
+      - SPRING_DATASOURCE_USERNAME=taskmanager
+      - SPRING_DATASOURCE_PASSWORD=taskmanager
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - psql-db
