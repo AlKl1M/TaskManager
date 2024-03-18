@@ -5,24 +5,25 @@ import lombok.*;
 
 import java.time.Instant;
 
-@Entity(name = "refresh_token")
-@Getter
-@Setter
-@Builder
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Builder
+@Table(schema = "taskmanager", name = "t_refresh_token")
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "c_user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "c_token")
     private String token;
 
-    @Column(nullable = false)
+    @Column(name = "c_expiry_date")
     private Instant expiryDate;
 }

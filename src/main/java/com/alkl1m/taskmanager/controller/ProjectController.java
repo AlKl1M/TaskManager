@@ -1,15 +1,17 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.MessageResponse;
-import com.alkl1m.taskmanager.dto.project.*;
+import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
+import com.alkl1m.taskmanager.controller.payload.project.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.project.ProjectService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -34,8 +36,10 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    ResponseEntity<MessageResponse> createProject(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                      @RequestBody @Validated CreateProjectRequest request) {
+    ResponseEntity<MessageResponse> createProject(@Valid @RequestBody CreateProjectRequest request,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  BindingResult bindingResult) throws BindException {
+        checkBindingErrors(bindingResult);
         CreateProjectCommand cmd = CreateProjectCommand.builder()
                 .id(userDetails.getId())
                 .name(request.name())
@@ -53,7 +57,9 @@ public class ProjectController {
     @PutMapping("/projects/{id}")
     @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
     ResponseEntity<?> updateProject(@PathVariable(name = "id") Long id,
-                                         @RequestBody @Validated UpdateProjectRequest request) {
+                                    @RequestBody @Valid UpdateProjectRequest request,
+                                    BindingResult bindingResult) throws BindException {
+        checkBindingErrors(bindingResult);
         UpdateProjectCommand cmd = new UpdateProjectCommand(id, request.name(), request.description());
         projectService.update(cmd);
         log.info("Project updated");
@@ -65,7 +71,7 @@ public class ProjectController {
     ResponseEntity<?> deleteProject(@PathVariable(name = "id") Long id) {
         projectService.delete(id);
         log.info("Project deleted");
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/projects/{id}/changeStatus")
@@ -73,5 +79,15 @@ public class ProjectController {
     ResponseEntity<?> changeProjectStatus(@PathVariable(name = "id") Long id) {
         projectService.changeStatus(id);
         return ResponseEntity.ok("Project status changed successfully");
+    }
+
+    private void checkBindingErrors(BindingResult bindingResult) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        }
     }
 }

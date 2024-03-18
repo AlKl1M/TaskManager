@@ -17,35 +17,35 @@ import java.time.Instant;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="tasks")
+@Table(schema = "taskmanager", name="t_tasks")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(name = "c_name")
     private String name;
-    @Column(nullable = false)
+    @Column(name = "c_description")
     private String description;
-    @Column(name="created_at", nullable = false)
+    @Column(name="c_created_at")
     private Instant createdAt;
-    @Column(name="done_at")
+    @Column(name="c_done_at")
     private Instant doneAt;
-    @Column(name="deadline")
+    @Column(name="c_deadline")
     private Instant deadline;
-    @Column(nullable = false)
+    @Column(name="c_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
-    @Column(nullable = true)
+    @Column(name="c_tags")
     private String tags;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
-    @JoinColumn(name="project_id", nullable = false)
+    @JoinColumn(name="c_project_id", nullable = false)
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JsonIgnore
     private Project project;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name="c_user_id", nullable = false)
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JsonIgnore
     private User user;

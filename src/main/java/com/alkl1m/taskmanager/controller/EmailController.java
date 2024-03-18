@@ -1,8 +1,8 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.PasswordRequestUtil;
-import com.alkl1m.taskmanager.dto.auth.PasswordResetDto;
-import com.alkl1m.taskmanager.dto.auth.PasswordResetRequestDto;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordRequestUtil;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetDto;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetRequestDto;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.event.listener.RegistrationCompleteEventListener;
 import com.alkl1m.taskmanager.service.user.UserService;

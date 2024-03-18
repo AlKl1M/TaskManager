@@ -14,19 +14,20 @@ import java.util.GregorianCalendar;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(schema = "taskmanager", name="t_password_reset_token")
 public class PasswordResetToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "c_user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "c_token",nullable = false, unique = true)
     private String token;
 
-    @Column(nullable = false)
+    @Column(name = "c_expiry_date", nullable = false)
     private Date expiryDate;
 
     private static final int EXPIRATION_TIME = 5;

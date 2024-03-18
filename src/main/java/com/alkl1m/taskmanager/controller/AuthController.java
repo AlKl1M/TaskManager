@@ -1,6 +1,8 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.*;
+import com.alkl1m.taskmanager.controller.payload.auth.LoginRequest;
+import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
+import com.alkl1m.taskmanager.controller.payload.auth.SignupRequest;
 import com.alkl1m.taskmanager.entity.*;
 import com.alkl1m.taskmanager.enums.Role;
 import com.alkl1m.taskmanager.event.RegistrationCompleteEvent;
