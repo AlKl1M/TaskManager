@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.dto.dashboard;
+package com.alkl1m.taskmanager.controller.payload.dashboard;
 
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.enums.Status;

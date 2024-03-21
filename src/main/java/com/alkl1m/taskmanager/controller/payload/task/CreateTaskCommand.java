@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.dto.task;
+package com.alkl1m.taskmanager.controller.payload.task;
 
 import lombok.Builder;
 

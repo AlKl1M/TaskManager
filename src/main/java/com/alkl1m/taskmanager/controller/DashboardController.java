@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.dashboard.DashboardDto;
+import com.alkl1m.taskmanager.controller.payload.dashboard.DashboardDto;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.dashboard.DashboardService;
 import lombok.AllArgsConstructor;

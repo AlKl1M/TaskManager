@@ -1,7 +1,7 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.MessageResponse;
-import com.alkl1m.taskmanager.dto.task.*;
+import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
+import com.alkl1m.taskmanager.controller.payload.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +38,8 @@ public class TaskController {
 
     @PostMapping("/projects/{projectId}/tasks")
     ResponseEntity<?> createTask(@PathVariable Long projectId,
-                                   @RequestBody @Validated CreateTaskRequest request,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                 @RequestBody @Validated CreateTaskRequest request,
+                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
         CreateTaskCommand cmd = CreateTaskCommand.builder()
                 .id(userDetails.getId())
                 .name(request.name())
@@ -57,7 +57,7 @@ public class TaskController {
     @PutMapping("/projects/{projectId}/tasks/{taskId}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
     ResponseEntity<?> updateTask(@PathVariable Long taskId,
-                @RequestBody @Validated UpdateTaskRequest request) {
+                                 @RequestBody @Validated UpdateTaskRequest request) {
         UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
         taskService.update(cmd);
         log.info("UpdateTaskCommand has been created!");

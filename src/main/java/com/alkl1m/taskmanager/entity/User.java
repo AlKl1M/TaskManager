@@ -17,30 +17,26 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = "name"),
-        @UniqueConstraint(columnNames = "email")
-    })
+@Table(schema = "taskmanager", name = "t_users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(max = 20)
+    @Column(name="c_name")
     private String name;
 
-    @NotBlank
-    @Size(max = 50)
+    @Column(name="c_email")
     @Email
     private String email;
 
-    @NotBlank
-    @Size(max = 80)
+    @Column(name="c_password")
     private String password;
 
+    @Column(name="c_role")
     private Role role;
+
+    @Column(name="c_enabled")
     private Boolean enabled = false;
 
     @OneToMany(mappedBy = "user",

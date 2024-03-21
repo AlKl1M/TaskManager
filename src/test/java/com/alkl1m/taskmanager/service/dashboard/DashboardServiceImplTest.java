@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.service.dashboard;
 
-import com.alkl1m.taskmanager.dto.dashboard.DashboardDto;
+import com.alkl1m.taskmanager.controller.payload.dashboard.DashboardDto;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.Task;
 import com.alkl1m.taskmanager.entity.User;

@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.dto.project;
+package com.alkl1m.taskmanager.controller.payload.project;
 
 public record UpdateProjectCommand(
         Long id,
