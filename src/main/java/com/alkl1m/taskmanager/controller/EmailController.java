@@ -1,5 +1,10 @@
 package com.alkl1m.taskmanager.controller;
 
+import com.alkl1m.taskmanager.aspects.BindingChecker;
+import com.alkl1m.taskmanager.controller.exception.InvalidOldPasswordException;
+import com.alkl1m.taskmanager.controller.exception.InvalidPasswordResetTokenException;
+import com.alkl1m.taskmanager.controller.exception.InvalidVerificationTokenException;
+import com.alkl1m.taskmanager.controller.exception.UserNotFoundException;
 import com.alkl1m.taskmanager.controller.payload.auth.PasswordRequestUtil;
 import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetDto;
 import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetRequestDto;
@@ -10,6 +15,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -26,21 +32,25 @@ public class EmailController {
     private final RegistrationCompleteEventListener eventListener;
 
     @GetMapping("/verifyEmail")
-    public void sendVerificationToken(@RequestParam("token") String token){
+    public ResponseEntity<?> sendVerificationToken(@RequestParam("token") String token){
         boolean verificationResult = userService.validateToken(token);
         if (verificationResult){
             log.info("User verified account by email successfully");
+            return ResponseEntity
+                    .ok("User verified account by email successfully");
         } else {
             log.warn("User trying to use invalid verification link to verify account");
+            throw new InvalidVerificationTokenException();
         }
     }
 
     @PostMapping("/password-reset-request")
+    @BindingChecker
     public String resetPasswordRequest(@RequestBody PasswordResetRequestDto passwordResetRequestDto,
                                        final HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         log.info("Received password reset request");
         Optional<User> user = userService.findByEmail(passwordResetRequestDto.email());
-        String passwordResetUrl;
+        String passwordResetUrl = "";
         if (user.isPresent()) {
             String passwordResetToken = UUID.randomUUID().toString();
             userService.createPasswordResetTokenForUser(user.get(), passwordResetToken);
@@ -49,37 +59,43 @@ public class EmailController {
             log.info("Password reset URL: {}", passwordResetUrl);
         } else {
             log.warn("User not found with email: {}", passwordResetRequestDto.email());
+            throw new UserNotFoundException(passwordResetRequestDto.email());
         }
         return passwordResetUrl;
     }
 
     @PostMapping("/reset-password")
-    public void resetPassword(@RequestBody PasswordResetDto passwordResetDto,
-                              @RequestParam("token") String passwordResetToken){
+    @BindingChecker
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetDto passwordResetDto,
+                                           @RequestParam("token") String passwordResetToken){
         boolean tokenVerificationResult = userService.validatePasswordResetToken(passwordResetToken);
         if (!tokenVerificationResult) {
-            log.error("Invalid token password reset token");
-        }
-        Optional<User> theUser = Optional.ofNullable(userService.findUserByPasswordToken(passwordResetToken));
-        log.debug("Is user present: " + theUser.isPresent() + ", User name: " + theUser.get().getName());
-        if (theUser.isPresent()) {
-            userService.changePassword(theUser.get(), passwordResetDto.password());
-            log.info("Password has been reset successfully");
+            log.error("User try to reset password with invalid password reset token");
+            throw new InvalidPasswordResetTokenException();
         }
         else {
-            log.error("user ");
+            Optional<User> theUser = Optional.ofNullable(userService.findUserByPasswordToken(passwordResetToken));
+            log.debug("Is user present: " + theUser.isPresent() + ", User name: " + theUser.get().getName());
+                userService.changePassword(theUser.get(), passwordResetDto.password());
+                log.info("Password has been reset successfully");
+                return ResponseEntity.ok("Password has been reset successfully");
         }
     }
 
     @PostMapping("/change-password")
-    public void changePassword(@RequestBody PasswordRequestUtil requestUtil){
+    @BindingChecker
+    public ResponseEntity<?> changePassword(@RequestBody PasswordRequestUtil requestUtil){
         User user = userService.findByEmail(requestUtil.email()).get();
+        System.out.println(user.getPassword());
         if (!userService.oldPasswordIsValid(user, requestUtil.oldPassword())){
             log.error("Incorrect old password");
-            return;
+            throw new InvalidOldPasswordException();
         }
-        userService.changePassword(user, requestUtil.newPassword());
-        log.info("Password changed successfully");
+        else {
+            userService.changePassword(user, requestUtil.newPassword());
+            log.info("Password changed successfully");
+            return ResponseEntity.ok("Password changed successfully");
+        }
     }
     private String passwordResetEmailLink(String applicationUrl, String passwordResetToken)
             throws MessagingException, UnsupportedEncodingException {

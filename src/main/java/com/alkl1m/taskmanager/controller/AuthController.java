@@ -6,7 +6,7 @@ import com.alkl1m.taskmanager.controller.payload.auth.SignupRequest;
 import com.alkl1m.taskmanager.entity.*;
 import com.alkl1m.taskmanager.enums.Role;
 import com.alkl1m.taskmanager.event.RegistrationCompleteEvent;
-import com.alkl1m.taskmanager.exception.TokenRefreshException;
+import com.alkl1m.taskmanager.controller.exception.TokenRefreshException;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import com.alkl1m.taskmanager.service.auth.RefreshTokenService;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
@@ -113,6 +113,7 @@ public class AuthController {
                 refreshTokenService.deleteByUserId(userId);
             }
         }
+        ///TODO
         ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
         ResponseCookie jwtRefreshCookie = jwtUtils.getCleanJwtRefreshToken();
         log.info("Cleaned JWT cookies. User signed out");

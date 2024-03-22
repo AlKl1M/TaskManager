@@ -26,7 +26,7 @@ create table taskmanager.t_tasks (
                                      c_description varchar(255) not null check ( length(c_description) between 3 and 90),
                                      c_created_at timestamp(6) with time zone not null,
                                      c_done_at timestamp(6) with time zone,
-                                     c_deadline timestamp(6) with time zone,
+                                     c_deadline timestamp(6) with time zone check (c_deadline > CURRENT_DATE),
                                      c_status varchar(255) not null check (c_status in ('DONE', 'IN_WORK')),
                                      c_tags varchar(255),
                                      c_project_id int not null,

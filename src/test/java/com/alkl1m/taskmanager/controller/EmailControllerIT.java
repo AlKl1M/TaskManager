@@ -1,16 +1,18 @@
 package com.alkl1m.taskmanager.controller;
 
 import com.alkl1m.taskmanager.TestBeans;
-import com.alkl1m.taskmanager.dto.auth.PasswordRequestUtil;
-import com.alkl1m.taskmanager.dto.auth.PasswordResetDto;
-import com.alkl1m.taskmanager.dto.auth.PasswordResetRequestDto;
+
+import com.alkl1m.taskmanager.controller.exception.InvalidVerificationTokenException;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordRequestUtil;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetDto;
+import com.alkl1m.taskmanager.controller.payload.auth.PasswordResetRequestDto;
 import com.alkl1m.taskmanager.entity.*;
-import com.alkl1m.taskmanager.enums.Role;
 import com.alkl1m.taskmanager.event.RegistrationCompleteEvent;
 import com.alkl1m.taskmanager.repository.*;
+import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +20,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 import java.util.UUID;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = TestBeans.class)
 @AutoConfigureMockMvc
+@Transactional
 public class EmailControllerIT {
     @Autowired
     MockMvc mockMvc;
@@ -46,113 +55,139 @@ public class EmailControllerIT {
     User user;
     @BeforeEach
     public void setUp(){
-        user = User.builder()
-                .id(1L)
-                .name(UUID.randomUUID().toString().substring(0, 8))
-                .email("example@example.com")
-                .password(encoder.encode("123"))
-                .role(Role.USER)
-                .enabled(true)
-                .build();
-        userRepository.save(user);
+        Optional<User> optionalUser = userRepository.findById(1L);
+        user = optionalUser.get();
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         publisher.publishEvent(new RegistrationCompleteEvent(user, "http://localhost:8080/signup"));
     }
 
-    @AfterEach
-    public void tearDown(){
-        verificationTokenRepository.deleteAll();
-        passwordResetTokenRepository.deleteAll();
-        userRepository.deleteAll();
-    }
     @Test
+    @Sql("/sql/user.sql")
     public void resetPasswordRequest_ReturnsValidResponse() throws Exception {
-        PasswordResetRequestDto passwordResetRequestDto = new PasswordResetRequestDto("example@example.com");
-        mockMvc.perform(post("/api/auth/password-reset-request")
+        PasswordResetRequestDto passwordResetRequestDto = new PasswordResetRequestDto("john.doe@example.com");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/password-reset-request")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(passwordResetRequestDto))
                 ).andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.message").value("We send email with link for reset password to " + "example@example.com")
+                        status().isOk()
                 );
     }
 
     @Test
+    @Sql("/sql/user.sql")
     public void resetPasswordRequest_ReturnsInvalidUserNotFound() throws Exception {
         PasswordResetRequestDto passwordResetRequestDto = new PasswordResetRequestDto("NOexample@example.com");
-        mockMvc.perform(post("/api/auth/password-reset-request")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/password-reset-request")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(passwordResetRequestDto))
         ).andExpectAll(
                 status().isBadRequest(),
-                jsonPath("$.message").value("User not found with email " + "NOexample@example.com")
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON),
+                content().json("""
+                            {
+                                "Error": 
+                                    "User not found with email: NOexample@example.com"  
+                            }
+                        """)
         );
+        Assertions.assertNotEquals(passwordResetRequestDto.email(), user.getEmail());
     }
 
     @Test
+    @Sql("/sql/user.sql")
     public void sendVerificationToken_ReturnsValidResponse() throws Exception {
         VerificationToken verificationToken = verificationTokenRepository.findByUser(user);
-        mockMvc.perform(get("/api/auth/verifyEmail?token={verificationToken}", verificationToken.getToken()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/verifyEmail?token={verificationToken}", verificationToken.getToken()))
                 .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.message").value("User verified account by email successfully")
+                        status().isOk()
                 );
     }
     @Test
-    public void sendVerificationToken_ReturnsInvalidVerificationToken() throws Exception {
+    @Sql("/sql/user.sql")
+    public void sendVerificationToken_ReturnsInvalidVerificationToken()
+            throws Exception {
         String verificationToken = UUID.randomUUID().toString();
-        mockMvc.perform(get("/api/auth/verifyEmail?token={verificationToken}", verificationToken))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/verifyEmail?token={verificationToken}", verificationToken))
                 .andExpectAll(
                         status().isBadRequest(),
-                        jsonPath("$.message").value("User trying to use invalid verification link to verify account")
+                        content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON),
+                        content().json("""
+                                {
+                                "Error":
+                                    "User trying to use invalid verification link to verify account"
+                                 }
+                                    """)
                 );
     }
     @Test
+    @Sql("/sql/user.sql")
     public void resetPassword_ReturnsValidResponse() throws Exception {
         String passwordToken = UUID.randomUUID().toString();
         PasswordResetToken passwordResetToken = new PasswordResetToken(user, passwordToken);
         passwordResetTokenRepository.save(passwordResetToken);
         PasswordResetDto passwordResetDto = new PasswordResetDto("example@example.com", "456");
-        mockMvc.perform(post("/api/auth/reset-password?token={passwordResetToken}", passwordResetToken.getToken())
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reset-password?token={passwordResetToken}", passwordResetToken.getToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(passwordResetDto))
         ).andExpectAll(
-                status().isOk(),
-                jsonPath("$.message").value("Password has been reset successfully")
+                status().isOk()
         );
     }
 
     @Test
+    @Sql("/sql/user.sql")
     public void resetPassword_ReturnsInValidPasswordResetToken() throws Exception {
-        String passwordToken = UUID.randomUUID().toString();
-        PasswordResetToken passwordResetToken = new PasswordResetToken(user, passwordToken);
-        passwordResetTokenRepository.save(passwordResetToken);
+        String passwordTokenUnused = UUID.randomUUID().toString();
         PasswordResetDto passwordResetDto = new PasswordResetDto("example@example.com", "456");
-        mockMvc.perform(post("/api/auth/reset-password?token={passwordResetToken}", (Object) null)
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reset-password?token={passwordResetToken}", passwordTokenUnused)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(passwordResetDto))
         ).andExpectAll(
                 status().isBadRequest(),
-                jsonPath("$.message").value("Invalid token password reset token")
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON),
+                content().json("""
+                            {
+                                "Error": 
+                                    "User try to reset password with invalid password reset token"  
+                            }
+                        """)
         );
+        Assertions.assertNull(passwordResetTokenRepository.findByToken(passwordTokenUnused));
     }
 
     @Test
+    @Sql("/sql/user.sql")
     public void changePassword_ReturnsValidResponse() throws Exception {
-        PasswordRequestUtil passwordRequestUtil = new PasswordRequestUtil("example@example.com", "123", "456");
-        mockMvc.perform(post("/api/auth/change-password")
+        String password = "password";
+        PasswordRequestUtil passwordRequestUtil = new PasswordRequestUtil(user.getEmail(), password, "456");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/change-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(passwordRequestUtil))
-        ).andExpectAll(status().isOk(),
-                jsonPath("$.message").value("Password changed successfully"));
+        ).andExpectAll(
+                status().isOk()
+        );
     }
     @Test
+    @Sql("/sql/user.sql")
     public void changePassword_ReturnsInvalidOldPassword() throws Exception {
-        PasswordRequestUtil passwordRequestUtil = new PasswordRequestUtil("example@example.com", "NO123", "456");
-        mockMvc.perform(post("/api/auth/change-password")
+        String password = "password";
+        PasswordRequestUtil passwordRequestUtil = new PasswordRequestUtil(user.getEmail(), "NO"+password, "456");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/change-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(passwordRequestUtil))
-        ).andExpectAll(status().isBadRequest(),
-                jsonPath("$.message").value("Incorrect old password"));
+        ).andExpectAll(
+                status().isBadRequest(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON),
+                content().json("""
+                            {
+                                "Error": 
+                                    "Exception of trying to change password with incorrect old password"  
+                            }
+                        """)
+        );
+
     }
 
     private String asJsonString(Object object) throws JsonProcessingException {

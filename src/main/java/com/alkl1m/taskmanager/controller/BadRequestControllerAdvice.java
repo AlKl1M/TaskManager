@@ -1,5 +1,9 @@
 package com.alkl1m.taskmanager.controller;
 
+import com.alkl1m.taskmanager.controller.exception.InvalidOldPasswordException;
+import com.alkl1m.taskmanager.controller.exception.InvalidPasswordResetTokenException;
+import com.alkl1m.taskmanager.controller.exception.InvalidVerificationTokenException;
+import com.alkl1m.taskmanager.controller.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,18 @@ public class BadRequestControllerAdvice {
                         .map(ObjectError::getDefaultMessage)
                         .toList());
 
+        return ResponseEntity.badRequest()
+                .body(problemDetail);
+    }
+
+    @ExceptionHandler({InvalidVerificationTokenException.class, InvalidPasswordResetTokenException.class,
+            InvalidOldPasswordException.class, UserNotFoundException.class})
+    public ResponseEntity<ProblemDetail> handleInvalidVerificationTokenException(
+            RuntimeException exception) {
+        ProblemDetail problemDetail = ProblemDetail
+                .forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setProperty("Error",
+                exception.getMessage());
         return ResponseEntity.badRequest()
                 .body(problemDetail);
     }

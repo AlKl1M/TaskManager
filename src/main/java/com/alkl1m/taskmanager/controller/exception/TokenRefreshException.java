@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.exception;
+package com.alkl1m.taskmanager.controller.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

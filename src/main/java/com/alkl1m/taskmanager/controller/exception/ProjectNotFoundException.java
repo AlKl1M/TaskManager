@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.exception;
+package com.alkl1m.taskmanager.controller.exception;
 
 public class ProjectNotFoundException extends RuntimeException {
     public ProjectNotFoundException(Long id) {

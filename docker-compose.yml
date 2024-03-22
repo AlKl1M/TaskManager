@@ -10,7 +10,8 @@ services:
       - POSTGRES_DB=taskmanager
     ports:
       - '5432:5432'
-
+    networks:
+      - psql-db
   taskmanager:
     build:
       context: .
@@ -25,3 +26,29 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       - psql-db
+    networks:
+      - psql-db
+  pgadmin:
+    container_name: PGadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - psql-db
+    restart: unless-stopped
+
+networks:
+  psql-db:
+    driver: bridge
+  spring:
+    driver: bridge
+
+volumes:
+  psql-db:
+  pgadmin:

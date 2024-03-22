@@ -1,14 +1,17 @@
 package com.alkl1m.taskmanager.controller;
 
+import com.alkl1m.taskmanager.aspects.BindingChecker;
 import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
 import com.alkl1m.taskmanager.controller.payload.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -37,9 +40,10 @@ public class TaskController {
     }
 
     @PostMapping("/projects/{projectId}/tasks")
+    @BindingChecker
     ResponseEntity<?> createTask(@PathVariable Long projectId,
                                  @RequestBody @Validated CreateTaskRequest request,
-                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                 @AuthenticationPrincipal UserDetailsImpl userDetails){
         CreateTaskCommand cmd = CreateTaskCommand.builder()
                 .id(userDetails.getId())
                 .name(request.name())
@@ -56,8 +60,9 @@ public class TaskController {
     }
     @PutMapping("/projects/{projectId}/tasks/{taskId}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    @BindingChecker
     ResponseEntity<?> updateTask(@PathVariable Long taskId,
-                                 @RequestBody @Validated UpdateTaskRequest request) {
+                                 @RequestBody @Valid UpdateTaskRequest request){
         UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
         taskService.update(cmd);
         log.info("UpdateTaskCommand has been created!");
@@ -69,7 +74,7 @@ public class TaskController {
     ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
         taskService.delete(taskId);
         log.info("Task deleted successfully");
-        return ResponseEntity.ok("Task deleted successfully");
+        return ResponseEntity.noContent().build();
     }
     @PutMapping("/projects/{projectId}/tasks/{taskId}/done")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
