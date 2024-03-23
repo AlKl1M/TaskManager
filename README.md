@@ -5,6 +5,7 @@ Api for task manager built on Spring Framework for leaning purposes.
 * Java 17
 * Spring framework (Spring boot, Spring Security, String Data JPA/Hibernate, Spring Web, Spring boot starter mail)
 * Postgresql
+* PGAdmin
 * Lombok
 * JUnit
 * JWT
