@@ -154,7 +154,7 @@ class ProjectControllerIT {
     @Test
     @Sql("/sql/user_and_projects.sql")
     void deleteProjectWithExistingProject_ReturnsValidResponse() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/user/projects/{id}", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/user/projects/{projectId}", 1L))
                 .andExpectAll(
                         status().isNoContent()
                 );
@@ -163,7 +163,7 @@ class ProjectControllerIT {
     @Test
     @Sql("/sql/user_and_projects.sql")
     void changeStatusWithExistingProjects_ReturnsValidResponse() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/user/projects/{id}/changeStatus", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/user/projects/{projectId}/changeStatus", 1L))
                 .andExpect(
                         status().isOk()
                 );

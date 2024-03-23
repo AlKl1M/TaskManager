@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.aspects.BindingChecker;
+import com.alkl1m.taskmanager.util.checker.BindingChecker;
 import com.alkl1m.taskmanager.controller.exception.InvalidOldPasswordException;
 import com.alkl1m.taskmanager.controller.exception.InvalidPasswordResetTokenException;
 import com.alkl1m.taskmanager.controller.exception.InvalidVerificationTokenException;

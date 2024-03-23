@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.aspects.BindingChecker;
+import com.alkl1m.taskmanager.util.checker.BindingChecker;
 import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
 import com.alkl1m.taskmanager.controller.payload.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;

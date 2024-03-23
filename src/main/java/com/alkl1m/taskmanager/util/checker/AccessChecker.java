@@ -1,4 +1,4 @@
-package com.alkl1m.taskmanager.util;
+package com.alkl1m.taskmanager.util.checker;
 
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.TaskRepository;
