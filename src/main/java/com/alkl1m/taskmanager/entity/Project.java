@@ -18,20 +18,20 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="projects")
+@Table(schema = "taskmanager", name="t_projects")
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(name = "c_name")
     private String name;
-    @Column(nullable = false)
+    @Column(name = "c_description")
     private String description;
-    @Column(name="created_at", nullable = false)
+    @Column(name="c_created_at")
     private Instant createdAt;
-    @Column(name="done_at")
+    @Column(name="c_done_at")
     private Instant doneAt;
-    @Column(nullable = false)
+    @Column(name="c_status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -39,7 +39,7 @@ public class Project {
     private List<Task> tasks;
 
     @ManyToOne(fetch= FetchType.LAZY, optional=false)
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name="c_user_id", nullable = false)
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JsonIgnore
     private User user;

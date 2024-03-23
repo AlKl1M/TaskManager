@@ -1,18 +1,18 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.MessageResponse;
-import com.alkl1m.taskmanager.dto.project.*;
+import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
+import com.alkl1m.taskmanager.controller.payload.project.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.project.ProjectService;
+import com.alkl1m.taskmanager.util.checker.BindingChecker;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.net.URI;
 import java.util.List;
 
@@ -34,8 +34,9 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
-    ResponseEntity<MessageResponse> createProject(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                      @RequestBody @Validated CreateProjectRequest request) {
+    @BindingChecker
+    ResponseEntity<MessageResponse> createProject(@Valid @RequestBody CreateProjectRequest request,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
         CreateProjectCommand cmd = CreateProjectCommand.builder()
                 .id(userDetails.getId())
                 .name(request.name())
@@ -44,34 +45,35 @@ public class ProjectController {
         ProjectDto project = projectService.create(cmd);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
-                .path("/api/projects/{id}")
+                .path("/api/projects/{id:\\d+}")
                 .buildAndExpand(project.id()).toUri();
         return ResponseEntity.created(location)
                         .body(new MessageResponse("Project created successfully"));
     }
 
-    @PutMapping("/projects/{id}")
-    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    ResponseEntity<?> updateProject(@PathVariable(name = "id") Long id,
-                                         @RequestBody @Validated UpdateProjectRequest request) {
-        UpdateProjectCommand cmd = new UpdateProjectCommand(id, request.name(), request.description());
+    @PutMapping("/projects/{projectId:\\d+}")
+    @BindingChecker
+    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #projectId)")
+    ResponseEntity<?> updateProject(@PathVariable(name = "projectId") Long projectId,
+                                    @RequestBody @Valid UpdateProjectRequest request) {
+        UpdateProjectCommand cmd = new UpdateProjectCommand(projectId, request.name(), request.description());
         projectService.update(cmd);
         log.info("Project updated");
         return ResponseEntity.ok("Project updated successfully");
     }
 
-    @DeleteMapping("/projects/{id}")
-    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    ResponseEntity<?> deleteProject(@PathVariable(name = "id") Long id) {
-        projectService.delete(id);
+    @DeleteMapping("/projects/{projectId:\\d+}")
+    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #projectId)")
+    ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") Long projectId) {
+        projectService.delete(projectId);
         log.info("Project deleted");
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/projects/{id}/changeStatus")
-    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #id)")
-    ResponseEntity<?> changeProjectStatus(@PathVariable(name = "id") Long id) {
-        projectService.changeStatus(id);
+    @PutMapping("/projects/{projectId:\\d+}/changeStatus")
+    @PreAuthorize("@accessChecker.isProjectBelongToUser(principal, #projectId)")
+    ResponseEntity<?> changeProjectStatus(@PathVariable(name = "projectId") Long projectId) {
+        projectService.changeStatus(projectId);
         return ResponseEntity.ok("Project status changed successfully");
     }
 }

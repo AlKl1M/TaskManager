@@ -1,6 +1,6 @@
 package com.alkl1m.taskmanager.service.dashboard;
 
-import com.alkl1m.taskmanager.dto.dashboard.DashboardDto;
+import com.alkl1m.taskmanager.controller.payload.dashboard.DashboardDto;
 
 public interface DashboardService {
     DashboardDto getDashboardData(Long userId);

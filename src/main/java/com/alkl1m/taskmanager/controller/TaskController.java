@@ -1,9 +1,11 @@
 package com.alkl1m.taskmanager.controller;
 
-import com.alkl1m.taskmanager.dto.auth.MessageResponse;
-import com.alkl1m.taskmanager.dto.task.*;
+import com.alkl1m.taskmanager.util.checker.BindingChecker;
+import com.alkl1m.taskmanager.controller.payload.auth.MessageResponse;
+import com.alkl1m.taskmanager.controller.payload.task.*;
 import com.alkl1m.taskmanager.service.auth.UserDetailsImpl;
 import com.alkl1m.taskmanager.service.task.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,14 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class TaskController {
     private final TaskService taskService;
-    @GetMapping("/projects/{projectId}/getAllTasksBySearchWord")
+    @GetMapping("/projects/{projectId:\\d+}/getAllTasksBySearchWord")
     List<CreateBackTaskDto> getAllTasksBySearchWord(
             @PathVariable Long projectId,
             @RequestParam(required = false) String searchWord,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return taskService.getAllTasksBySearchWord(userDetails.getId(), projectId, searchWord);
     }
-    @GetMapping("/projects/{projectId}/getAllTasksByTag")
+    @GetMapping("/projects/{projectId:\\d+}/getAllTasksByTag")
     List<CreateBackTaskDto> getAllTasksByTag(
             @PathVariable Long projectId,
             @RequestParam(required = false) String tag,
@@ -36,10 +38,11 @@ public class TaskController {
         return taskService.getAllTasksByTag(userDetails.getId(), projectId, tag);
     }
 
-    @PostMapping("/projects/{projectId}/tasks")
+    @PostMapping("/projects/{projectId:\\d+}/tasks")
+    @BindingChecker
     ResponseEntity<?> createTask(@PathVariable Long projectId,
-                                   @RequestBody @Validated CreateTaskRequest request,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                 @RequestBody @Validated CreateTaskRequest request,
+                                 @AuthenticationPrincipal UserDetailsImpl userDetails){
         CreateTaskCommand cmd = CreateTaskCommand.builder()
                 .id(userDetails.getId())
                 .name(request.name())
@@ -54,24 +57,25 @@ public class TaskController {
                 .buildAndExpand(projectId, task.id()).toUri();
         return ResponseEntity.created(location).body(new MessageResponse("Task created successfully"));
     }
-    @PutMapping("/projects/{projectId}/tasks/{taskId}")
+    @PutMapping("/projects/{projectId:\\d+}/tasks/{taskId:\\d+}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
+    @BindingChecker
     ResponseEntity<?> updateTask(@PathVariable Long taskId,
-                @RequestBody @Validated UpdateTaskRequest request) {
+                                 @RequestBody @Valid UpdateTaskRequest request){
         UpdateTaskCommand cmd = new UpdateTaskCommand(taskId, request.name(), request.description(), request.deadline(), request.tags());
         taskService.update(cmd);
         log.info("UpdateTaskCommand has been created!");
         return ResponseEntity.ok("Task deleted successfully");
     }
 
-    @DeleteMapping("/projects/{projectId}/tasks/{taskId}")
+    @DeleteMapping("/projects/{projectId:\\d+}/tasks/{taskId:\\d+}")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
     ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
         taskService.delete(taskId);
         log.info("Task deleted successfully");
-        return ResponseEntity.ok("Task deleted successfully");
+        return ResponseEntity.noContent().build();
     }
-    @PutMapping("/projects/{projectId}/tasks/{taskId}/done")
+    @PutMapping("/projects/{projectId:\\d+}/tasks/{taskId:\\d+}/done")
     @PreAuthorize("@accessChecker.isTaskBelongToUser(principal, #taskId)")
     ResponseEntity<?> changeTaskStatus(@PathVariable Long taskId) {
         taskService.changeStatus(taskId);

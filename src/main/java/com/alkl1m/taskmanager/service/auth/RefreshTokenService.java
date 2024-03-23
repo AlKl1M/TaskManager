@@ -1,7 +1,7 @@
 package com.alkl1m.taskmanager.service.auth;
 
 import com.alkl1m.taskmanager.entity.RefreshToken;
-import com.alkl1m.taskmanager.exception.TokenRefreshException;
+import com.alkl1m.taskmanager.controller.exception.TokenRefreshException;
 import com.alkl1m.taskmanager.repository.RefreshTokenRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import lombok.Getter;

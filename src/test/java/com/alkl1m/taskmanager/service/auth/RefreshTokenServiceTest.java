@@ -3,7 +3,7 @@ package com.alkl1m.taskmanager.service.auth;
 import com.alkl1m.taskmanager.entity.RefreshToken;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Role;
-import com.alkl1m.taskmanager.exception.TokenRefreshException;
+import com.alkl1m.taskmanager.controller.exception.TokenRefreshException;
 import com.alkl1m.taskmanager.repository.RefreshTokenRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;

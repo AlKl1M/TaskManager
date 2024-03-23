@@ -1,12 +1,12 @@
 package com.alkl1m.taskmanager.service.project;
 
-import com.alkl1m.taskmanager.dto.project.CreateProjectCommand;
-import com.alkl1m.taskmanager.dto.project.UpdateProjectCommand;
-import com.alkl1m.taskmanager.dto.project.ProjectDto;
+import com.alkl1m.taskmanager.controller.payload.project.CreateProjectCommand;
+import com.alkl1m.taskmanager.controller.payload.project.UpdateProjectCommand;
+import com.alkl1m.taskmanager.controller.payload.project.ProjectDto;
 import com.alkl1m.taskmanager.entity.Project;
 import com.alkl1m.taskmanager.entity.User;
 import com.alkl1m.taskmanager.enums.Status;
-import com.alkl1m.taskmanager.exception.ProjectNotFoundException;
+import com.alkl1m.taskmanager.controller.exception.ProjectNotFoundException;
 import com.alkl1m.taskmanager.repository.ProjectRepository;
 import com.alkl1m.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
